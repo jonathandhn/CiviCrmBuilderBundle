@@ -1,0 +1,126 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="CiviCrmLinkModalLabel">Lier cet e-mail à un modèle CiviCRM</h4>
+</div>
+
+<div class="modal-body">
+    <p>Saisissez un ID numérique (ex: <code>20</code>) pour rechercher par ID, ou du texte (ex: <code>Newsletter</code>) pour rechercher par nom de modèle.</p>
+    
+    <div class="form-group">
+        <label for="civicrm-template-search" class="control-label">Recherche CiviCRM</label>
+        <div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+            <input type="text" id="civicrm-template-search" class="form-control" placeholder="Entrez un ID ou un texte..." autocomplete="off">
+        </div>
+    </div>
+
+    <div id="civicrm-search-status" style="margin-bottom: 15px; color: #777;"></div>
+
+    <form id="civicrm-link-form" action="{{ path('civicrm_builder_civicrm_link_template', {'objectId': objectId}) }}" method="POST" style="display:none;">
+        <div class="form-group">
+            <label class="control-label">Sélectionnez le modèle à lier :</label>
+            <div id="civicrm-search-results" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px;">
+                <!-- Résultats insérés ici en JS -->
+            </div>
+        </div>
+        <div class="text-center mt-md">
+            <button type="submit" class="btn btn-primary btn-lg" id="civicrm-btn-submit" disabled><i class="fa fa-link"></i> Valider le lien</button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function($) {
+    let debounceTimer;
+    
+    $('#civicrm-template-search').on('input', function() {
+        clearTimeout(debounceTimer);
+        const query = $(this).val().trim();
+        const $status = $('#civicrm-search-status');
+        const $results = $('#civicrm-search-results');
+        const $form = $('#civicrm-link-form');
+        const $btn = $('#civicrm-btn-submit');
+
+        if (query.length === 0) {
+            $status.text('');
+            $form.hide();
+            return;
+        }
+
+        $status.html('<i class="fa fa-spinner fa-spin"></i> Recherche dans CiviCRM en cours...');
+        $form.hide();
+        $results.empty();
+        $btn.prop('disabled', true);
+
+        debounceTimer = setTimeout(function() {
+            $.ajax({
+                url: "{{ path('civicrm_builder_civicrm_search_template') }}",
+                type: 'POST',
+                data: { query: query },
+                success: function(response) {
+                    if (response.success && response.data && response.data.length > 0) {
+                        $status.html('<span class="text-success"><i class="fa fa-check"></i> ' + response.data.length + ' résultat(s) trouvé(s)</span>');
+                        $form.show();
+                        
+                        let html = '';
+                        response.data.forEach(function(item) {
+                            html += '<div class="radio"><label>';
+                            html += '<input type="radio" name="civicrm_template_id" value="' + item.id + '" required>';
+                            html += '<strong>[' + item.id + ']</strong> ' + item.msg_title;
+                            html += '</label></div>';
+                        });
+                        $results.html(html);
+
+                        // Activer le bouton si un choix est fait
+                        $('input[name="civicrm_template_id"]').on('change', function() {
+                            $btn.prop('disabled', false);
+                        });
+
+                        // Si c'est un chiffre (ID exact) et qu'il y a un seul résultat, le sélectionner par défaut
+                        if (response.data.length === 1 && /^\d+$/.test(query)) {
+                            $('input[name="civicrm_template_id"]').prop('checked', true).trigger('change');
+                        }
+
+                    } else {
+                        $status.html('<span class="text-danger"><i class="fa fa-exclamation-triangle"></i> Aucun modèle trouvé pour "' + query + '"</span>');
+                    }
+                },
+                error: function() {
+                    $status.html('<span class="text-danger"><i class="fa fa-times"></i> Erreur lors de la communication avec CiviCRM</span>');
+                }
+            });
+        }, 500); // 500ms debounce
+    });
+
+    // Handle form submission via AJAX to update Mautic properly
+    $('#civicrm-link-form').on('submit', function(e) {
+        e.preventDefault();
+        const $btn = $('#civicrm-btn-submit');
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Enregistrement...');
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Mautic function to close modal and show notification
+                    if (typeof mauticAjaxAction !== 'undefined') {
+                        // Trick to reload page or show flash
+                        window.location.reload();
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    alert(response.error || 'Erreur lors de la liaison.');
+                    $btn.prop('disabled', false).html('<i class="fa fa-link"></i> Valider le lien');
+                }
+            },
+            error: function() {
+                alert('Erreur serveur.');
+                $btn.prop('disabled', false).html('<i class="fa fa-link"></i> Valider le lien');
+            }
+        });
+    });
+})(jQuery);
+</script>

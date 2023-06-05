@@ -1,0 +1,21 @@
+{
+  "name": "jonathandhn/civicrm-builder-bundle",
+  "description": "CiviCRM Builder integration for Mautic",
+  "license": "GPL-3.0-or-later",
+  "type": "mautic-plugin",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "install-directory-name": "CiviCrmBuilderBundle"
+  },
+  "autoload": {
+    "psr-4": {
+      "MauticPlugin\\CiviCrmBuilderBundle\\": ""
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MauticPlugin\\CiviCrmBuilderBundle\\Tests\\": "Tests"
+    }
+  }
+}

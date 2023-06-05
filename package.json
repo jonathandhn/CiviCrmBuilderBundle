@@ -1,0 +1,19 @@
+{
+  "name": "civicrm-builder-plugin",
+  "version": "1.0.58",
+  "description": "Custom GrapesJS plugin for testing the plugin installation hook in Mautic's GrapesJS",
+  "license": "MIT",
+  "scripts": {
+    "build": "grapesjs-cli build",
+    "start": "grapesjs-cli serve"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "grapesjs": "^0.20.4",
+    "grapesjs-cli": "^3.0.1"
+  },
+  "main": "Assets/dist/index.js",
+  "files": [
+    "Assets/dist/"
+  ]
+}

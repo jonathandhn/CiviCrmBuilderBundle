@@ -15,11 +15,12 @@ class CiviCrmPermissions extends AbstractPermissions
 
     public function definePermissions(): void
     {
-        // Define custom bits for our 3 permissions
+        // Define custom bits for our permissions
         $this->addCustomPermission('civicrm', [
             'push_draft'    => 1, // bit 1
             'push_template' => 2, // bit 2
             'link_template' => 4, // bit 4
+            'save_block'    => 8, // bit 8
         ]);
     }
 
@@ -30,10 +31,11 @@ class CiviCrmPermissions extends AbstractPermissions
 
     public function buildForm(FormBuilderInterface &$builder, array $options, array $data): void
     {
-        $this->addCustomFormFields('grapesjscustomplugin', 'civicrm', $builder, 'CiviCRM Intégration', [
+        $this->addCustomFormFields('grapesjscustomplugin', 'civicrm', $builder, 'CiviCRM Intégration & Éditeur', [
             'Pousser un brouillon (Newsletter)'  => 'push_draft',
             'Pousser un modèle (MessageTemplate)' => 'push_template',
             'Lier à un modèle (MessageTemplate)'  => 'link_template',
+            'Sauvegarder un bloc personnalisé'    => 'save_block',
         ], $data);
     }
 }

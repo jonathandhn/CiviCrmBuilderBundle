@@ -42,8 +42,9 @@ class AssetsSubscriber implements EventSubscriberInterface
         }
 
         if ($this->config->isPublished()) {
-            $assetsEvent->addScript('plugins/GrapesJsCustomPluginBundle/Assets/dist/index.js?v=1.1.8');
-            //$assetsEvent->addStylesheet('plugins/GrapesJsCustomPluginBundle/Assets/dist/index.min.css');
+            $jsPath = __DIR__ . '/../Assets/dist/index.js';
+            $version = file_exists($jsPath) ? filemtime($jsPath) : '1.0.0';
+            $assetsEvent->addScript('plugins/GrapesJsCustomPluginBundle/Assets/dist/index.js?v=' . $version);
         }
     }
 }

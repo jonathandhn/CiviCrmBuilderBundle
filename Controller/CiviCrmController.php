@@ -6,6 +6,7 @@ namespace MauticPlugin\GrapesJsCustomPluginBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class CiviCrmController extends CommonController
 {
@@ -464,21 +465,150 @@ class CiviCrmController extends CommonController
             return new JsonResponse(['success' => false, 'error' => 'ID invalide.']);
         }
 
-        $db = $this->doctrine->getConnection();
-        $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
-        $settings = $settingsStr ? unserialize($settingsStr) : [];
-        if (!is_array($settings)) {
-            $settings = [];
+        try {
+            $db = $this->doctrine->getConnection();
+            $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
+            $settings = $settingsStr ? unserialize($settingsStr) : [];
+            if (!is_array($settings)) $settings = [];
+
+            if (!isset($settings['integration']['email_mappings'])) {
+                $settings['integration']['email_mappings'] = [];
+            }
+
+            $settings['integration']['email_mappings'][$objectId] = $civiTemplateId;
+
+            $db->executeStatement(
+                "UPDATE plugin_integration_settings SET feature_settings = :settings WHERE name = 'GrapesJsCustomPlugin'",
+                ['settings' => serialize($settings)]
+            );
+
+            return new JsonResponse(['success' => true, 'message' => 'Modèle lié avec succès.']);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'error' => 'Erreur de base de données : ' . $e->getMessage()]);
         }
-        if (!isset($settings['integration']) || !is_array($settings['integration'])) {
-            $settings['integration'] = [];
+    }
+
+    public function getThemeBlocksAction(string $theme): JsonResponse
+    {
+        // On sécurise le nom du thème (pas de ../ etc)
+        $theme = basename($theme);
+        
+        $projectDir = realpath(__DIR__ . '/../../../');
+        $themeDir = $projectDir . '/themes/' . $theme;
+        $blocksDir = $themeDir . '/blocks';
+
+        error_log("[GrapesJsCustomPlugin] Fetching blocks for theme: {$theme} from {$blocksDir}");
+
+        if (!is_dir($blocksDir)) {
+            error_log("[GrapesJsCustomPlugin] Blocks directory not found: {$blocksDir}");
+            return new JsonResponse([]);
         }
 
-        $settings['integration']['template_mappings'][$objectId] = $civiTemplateId;
-        $db->update('plugin_integration_settings', ['feature_settings' => serialize($settings)], ['name' => 'GrapesJsCustomPlugin']);
+        // --- GESTION DES COULEURS ET POLICES DYNAMIQUES ---
+        $variables = [];
+        $varFile = $themeDir . '/theme_variables.json';
+        if (file_exists($varFile)) {
+            $variables = json_decode(file_get_contents($varFile), true) ?: [];
+        }
 
-        $this->addFlashMessage('E-mail Mautic lié avec succès au Modèle CiviCRM ID ' . $civiTemplateId, [], 'success');
+        $blocks = [];
+        $files = scandir($blocksDir);
 
-        return new JsonResponse(['success' => true, 'closeModal' => true]);
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            $filePath = $blocksDir . '/' . $file;
+            $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+
+            if ($ext === 'json') {
+                $content = file_get_contents($filePath);
+                
+                // Remplacement dynamique des variables (ex: {color_primary} -> #ea148c)
+                foreach ($variables as $key => $val) {
+                    if (is_string($val)) {
+                        $content = str_replace('{' . $key . '}', $val, $content);
+                    }
+                }
+
+                $blockData = json_decode($content, true);
+                if ($blockData) {
+                    $blocks[] = $blockData;
+                } else {
+                    error_log("[GrapesJsCustomPlugin] Failed to parse JSON block file: {$filePath}");
+                }
+            } elseif ($ext === 'html' || $ext === 'twig') {
+                $id = pathinfo($filePath, PATHINFO_FILENAME);
+                $content = file_get_contents($filePath);
+                
+                foreach ($variables as $key => $val) {
+                    if (is_string($val)) {
+                        $content = str_replace('{' . $key . '}', $val, $content);
+                    }
+                }
+
+                $blocks[] = [
+                    'id'       => 'theme-block-' . $id,
+                    'label'    => ucfirst(str_replace('_', ' ', $id)),
+                    'category' => 'Thème ' . ucfirst($theme),
+                    'content'  => $content,
+                ];
+            }
+        }
+
+        error_log("[GrapesJsCustomPlugin] Successfully loaded " . count($blocks) . " blocks for theme: {$theme}");
+        return new JsonResponse($blocks);
+    }
+
+    /**
+     * @param string $theme
+     *
+     * @return JsonResponse
+     */
+    public function saveThemeBlockAction(Request $request, string $theme): JsonResponse
+    {
+        // Require auth
+        if (!$this->security->isGranted('grapesjscustomplugin:civicrm:save_block')) {
+            return new JsonResponse(['success' => false, 'error' => 'You do not have permission to save custom blocks.'], 403);
+        }
+
+        $theme = basename($theme);
+        $projectDir = realpath(__DIR__ . '/../../../');
+        $themeDir = $projectDir . '/themes/' . $theme;
+        $blocksDir = $themeDir . '/blocks';
+
+        if (!is_dir($blocksDir)) {
+            mkdir($blocksDir, 0755, true);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !isset($data['label']) || !isset($data['content'])) {
+            return new JsonResponse(['success' => false, 'error' => 'Missing data'], 400);
+        }
+
+        $id = isset($data['id']) && !empty($data['id']) ? preg_replace('/[^a-z0-9_-]/', '', strtolower($data['id'])) : 'custom-' . time();
+        
+        $block = [
+            'id' => $id,
+            'label' => $data['label'],
+            'category' => isset($data['category']) && !empty($data['category']) ? $data['category'] : 'Blocs Sauvegardés',
+            'content' => $data['content']
+        ];
+
+        if (isset($data['media']) && !empty($data['media'])) {
+            $block['media'] = $data['media'];
+        }
+
+        $filePath = $blocksDir . '/' . $id . '.json';
+
+        // Write file
+        file_put_contents($filePath, json_encode($block, JSON_PRETTY_PRINT));
+
+        return new JsonResponse([
+            'success' => true,
+            'block' => $block
+        ]);
     }
 }

@@ -29,11 +29,15 @@ return [
             ],
             'grapesjs_custom_civicrm_link_template' => [
                 'path'       => '/grapesjs-custom/link-template/{objectId}',
-                'controller' => 'GrapesJsCustomPluginBundle:CiviCrm:linkTemplate',
+                'controller' => \MauticPlugin\GrapesJsCustomPluginBundle\Controller\CiviCrmController::class . '::linkTemplateAction',
             ],
             'grapesjs_custom_theme_blocks' => [
                 'path'       => '/grapesjs-custom/theme-blocks/{theme}',
-                'controller' => 'GrapesJsCustomPluginBundle:CiviCrm:getThemeBlocks',
+                'controller' => \MauticPlugin\GrapesJsCustomPluginBundle\Controller\CiviCrmController::class . '::getThemeBlocksAction',
+            ],
+            'grapesjs_custom_theme_blocks_save' => [
+                'path'       => '/grapesjs-custom/theme-blocks/{theme}/save',
+                'controller' => \MauticPlugin\GrapesJsCustomPluginBundle\Controller\CiviCrmController::class . '::saveThemeBlockAction',
             ],
         ],
     ],

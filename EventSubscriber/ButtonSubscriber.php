@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\EventSubscriber;
+namespace MauticPlugin\CiviCrmBuilderBundle\EventSubscriber;
 
 use Mautic\CoreBundle\CoreEvents;
 use Mautic\CoreBundle\Event\CustomButtonEvent;
@@ -40,10 +40,10 @@ class ButtonSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $pushRoute = $this->router->generate('grapesjs_custom_civicrm_push', ['objectId' => $email->getId()]);
-        $pushTemplateRoute = $this->router->generate('grapesjs_custom_civicrm_push_template', ['objectId' => $email->getId()]);
+        $pushRoute = $this->router->generate('civicrm_builder_civicrm_push', ['objectId' => $email->getId()]);
+        $pushTemplateRoute = $this->router->generate('civicrm_builder_civicrm_push_template', ['objectId' => $email->getId()]);
 
-        if ($this->security->isGranted('grapesjscustomplugin:civicrm:push_draft')) {
+        if ($this->security->isGranted('civicrmbuilder:civicrm:push_draft')) {
             $event->addButton(
                 [
                     'attr'      => [
@@ -58,7 +58,7 @@ class ButtonSubscriber implements EventSubscriberInterface
             );
         }
 
-        if ($this->security->isGranted('grapesjscustomplugin:civicrm:push_template')) {
+        if ($this->security->isGranted('civicrmbuilder:civicrm:push_template')) {
             $event->addButton(
                 [
                     'attr'      => [
@@ -73,8 +73,8 @@ class ButtonSubscriber implements EventSubscriberInterface
             );
         }
 
-        if ($this->security->isGranted('grapesjscustomplugin:civicrm:link_template')) {
-            $linkRoute = $this->router->generate('grapesjs_custom_civicrm_link_modal', ['objectId' => $email->getId()]);
+        if ($this->security->isGranted('civicrmbuilder:civicrm:link_template')) {
+            $linkRoute = $this->router->generate('civicrm_builder_civicrm_link_modal', ['objectId' => $email->getId()]);
             
             $event->addButton(
                 [

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\EventSubscriber;
+namespace MauticPlugin\CiviCrmBuilderBundle\EventSubscriber;
 
 use Doctrine\DBAL\Connection;
 use Mautic\CoreBundle\Security\Permissions\CorePermissions;
@@ -48,12 +48,12 @@ class EmailProtectionSubscriber implements EventSubscriberInterface
         }
 
         // Si l'utilisateur est admin ou a les droits de modification de modèles, on le laisse passer
-        if ($this->security->isAdmin() || $this->security->isGranted('grapesjscustomplugin:civicrm:push_template')) {
+        if ($this->security->isAdmin() || $this->security->isGranted('civicrmbuilder:civicrm:push_template')) {
             return;
         }
 
         // Sinon on vérifie si l'e-mail est utilisé comme un modèle (s'il est mappé)
-        $settingsStr = $this->connection->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
+        $settingsStr = $this->connection->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
         if (!$settingsStr) {
             return;
         }

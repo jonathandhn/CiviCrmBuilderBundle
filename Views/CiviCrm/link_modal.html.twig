@@ -16,7 +16,7 @@
 
     <div id="civicrm-search-status" style="margin-bottom: 15px; color: #777;"></div>
 
-    <form id="civicrm-link-form" action="{{ path('grapesjs_custom_civicrm_link_template', {'objectId': objectId}) }}" method="POST" style="display:none;">
+    <form id="civicrm-link-form" action="{{ path('civicrm_builder_civicrm_link_template', {'objectId': objectId}) }}" method="POST" style="display:none;">
         <div class="form-group">
             <label class="control-label">Sélectionnez le modèle à lier :</label>
             <div id="civicrm-search-results" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px;">
@@ -54,7 +54,7 @@
 
         debounceTimer = setTimeout(function() {
             $.ajax({
-                url: "{{ path('grapesjs_custom_civicrm_search_template') }}",
+                url: "{{ path('civicrm_builder_civicrm_search_template') }}",
                 type: 'POST',
                 data: { query: query },
                 success: function(response) {

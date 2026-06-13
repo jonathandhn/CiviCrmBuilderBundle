@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\EventSubscriber;
+namespace MauticPlugin\CiviCrmBuilderBundle\EventSubscriber;
 
 use Mautic\CoreBundle\CoreEvents;
 use Mautic\CoreBundle\Event\CustomAssetsEvent;
 use Mautic\InstallBundle\Install\InstallService;
-use MauticPlugin\GrapesJsCustomPluginBundle\Integration\Config;
+use MauticPlugin\CiviCrmBuilderBundle\Integration\Config;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class AssetsSubscriber implements EventSubscriberInterface
@@ -44,7 +44,7 @@ class AssetsSubscriber implements EventSubscriberInterface
         if ($this->config->isPublished()) {
             $jsPath = __DIR__ . '/../Assets/dist/index.js';
             $version = file_exists($jsPath) ? filemtime($jsPath) : '1.0.0';
-            $assetsEvent->addScript('plugins/GrapesJsCustomPluginBundle/Assets/dist/index.js?v=' . $version);
+            $assetsEvent->addScript('plugins/CiviCrmBuilderBundle/Assets/dist/index.js?v=' . $version);
         }
     }
 }

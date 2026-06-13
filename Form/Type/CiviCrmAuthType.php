@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\Form\Type;
+namespace MauticPlugin\CiviCrmBuilderBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -54,7 +54,7 @@ class CiviCrmAuthType extends AbstractType
             'help' => 'Cochez cette case pour forcer la recréation de tous les MessageTemplates lors du prochain envoi.',
         ]);
 
-        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
             $data = $event->getData();
             if (!empty($data['clear_mappings'])) {
                 $data['email_mappings'] = [];

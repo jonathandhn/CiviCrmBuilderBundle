@@ -1,5 +1,5 @@
 {
-  "name": "grapesjs-custom-plugin",
+  "name": "civicrm-builder-plugin",
   "version": "1.0.58",
   "description": "Custom GrapesJS plugin for testing the plugin installation hook in Mautic's GrapesJS",
   "license": "MIT",

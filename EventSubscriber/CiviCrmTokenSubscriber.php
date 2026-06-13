@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\EventSubscriber;
+namespace MauticPlugin\CiviCrmBuilderBundle\EventSubscriber;
 
 use Mautic\EmailBundle\EmailEvents;
 use Mautic\EmailBundle\Event\EmailBuilderEvent;
@@ -10,8 +10,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CiviCrmTokenSubscriber implements EventSubscriberInterface
 {
-    private const API_KEY = '8geCAfNp6KQDofTKPkuM0fgt5dDFL5Z8';
-    private const API_URL = 'https://crm.sos-homophobie.org/civicrm/ajax/api4/Contact/getFields';
+    /** @var \Doctrine\DBAL\Connection */
+    private $db;
+
+    public function __construct(\Doctrine\DBAL\Connection $db)
+    {
+        $this->db = $db;
+    }
 
     public static function getSubscribedEvents(): array
     {
@@ -91,15 +96,26 @@ class CiviCrmTokenSubscriber implements EventSubscriberInterface
      */
     private function fetchContactTokens(): array
     {
+        $settingsStr = $this->db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
+        $settings = $settingsStr ? unserialize($settingsStr) : [];
+        $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
+        $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
+
+        if (empty($apiKey) || empty($civicrmUrl)) {
+            return [];
+        }
+
+        $apiUrl = rtrim($civicrmUrl, '/') . '/civicrm/ajax/api4/Contact/getFields';
+
         $payload = [
             'select' => ['name', 'title'],
             'limit' => 500,
         ];
 
-        $ch = curl_init(self::API_URL);
+        $ch = curl_init($apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'X-Civi-Auth: Bearer '.self::API_KEY,
+            'X-Civi-Auth: Bearer '.$apiKey,
             'Content-Type: application/x-www-form-urlencoded',
         ]);
         curl_setopt($ch, CURLOPT_POST, true);

@@ -1,6 +1,6 @@
 <?php
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\Security\Permissions;
+namespace MauticPlugin\CiviCrmBuilderBundle\Security\Permissions;
 
 use Mautic\CoreBundle\Helper\CoreParametersHelper;
 use Mautic\CoreBundle\Security\Permissions\AbstractPermissions;
@@ -26,12 +26,12 @@ class CiviCrmPermissions extends AbstractPermissions
 
     public function getName(): string
     {
-        return 'grapesjscustomplugin';
+        return 'civicrmbuilder';
     }
 
     public function buildForm(FormBuilderInterface &$builder, array $options, array $data): void
     {
-        $this->addCustomFormFields('grapesjscustomplugin', 'civicrm', $builder, 'CiviCRM Intégration & Éditeur', [
+        $this->addCustomFormFields('civicrmbuilder', 'civicrm', $builder, 'CiviCRM Intégration & Éditeur', [
             'Pousser un brouillon (Newsletter)'  => 'push_draft',
             'Pousser un modèle (MessageTemplate)' => 'push_template',
             'Lier à un modèle (MessageTemplate)'  => 'link_template',

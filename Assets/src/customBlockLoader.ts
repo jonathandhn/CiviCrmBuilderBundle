@@ -8,29 +8,32 @@ export interface CustomBlock {
   context?: string[];
 }
 
-export async function loadCustomBlocks(themeName: string, currentContext: string = 'email-mjml'): Promise<CustomBlock[]> {
-  console.info(`⏳ [GrapesJsCustomPlugin] Fetching custom JSON blocks for theme "${themeName}"...`);
-  const fetchUrl = '/s/grapesjs-custom/theme-blocks/' + themeName;
+export async function loadCustomBlocks(themeName: string, currentContext: string = 'email-mjml'): Promise<{blocks: CustomBlock[], themeVariables: any}> {
+  console.info(`⏳ [CiviCrmBuilder] Fetching custom JSON blocks for theme "${themeName}"...`);
+  const fetchUrl = '/s/civicrm-builder/theme-blocks/' + themeName;
 
   try {
     const response = await fetch(fetchUrl);
     if (!response.ok) {
-      console.error(`[GrapesJsCustomPlugin] HTTP Error ${response.status} while fetching blocks from ${fetchUrl}`);
-      return [];
+      console.error(`[CiviCrmBuilder] HTTP Error ${response.status} while fetching blocks from ${fetchUrl}`);
+      return {blocks: [], themeVariables: {}};
     }
 
     const jsonText = await response.text();
-    let blocks: any[];
+    let data: any;
     try {
-      blocks = JSON.parse(jsonText);
+      data = JSON.parse(jsonText);
     } catch (e) {
-      console.error('[GrapesJsCustomPlugin] Failed to parse JSON response:', e);
-      return [];
+      console.error('[CiviCrmBuilder] Failed to parse JSON response:', e);
+      return {blocks: [], themeVariables: {}};
     }
 
+    let blocks = Array.isArray(data) ? data : (data.blocks || []);
+    let themeVariables = data.theme_variables || {};
+
     if (!Array.isArray(blocks)) {
-      console.error('[GrapesJsCustomPlugin] Invalid response format. Expected an array of blocks.');
-      return [];
+      console.error('[CiviCrmBuilder] Invalid response format. Expected an array of blocks.');
+      return {blocks: [], themeVariables: {}};
     }
 
     const validBlocks: CustomBlock[] = [];
@@ -58,15 +61,15 @@ export async function loadCustomBlocks(themeName: string, currentContext: string
         });
       } else {
         invalidCount++;
-        console.warn('[GrapesJsCustomPlugin] Ignoring invalid JSON block:', b);
+        console.warn('[CiviCrmBuilder] Ignoring invalid JSON block:', b);
       }
     });
 
-    console.info(`[GrapesJsCustomPlugin] Successfully loaded ${validBlocks.length} custom blocks from ${fetchUrl}. (${invalidCount} invalid ignored)`);
-    return validBlocks;
+    console.info(`[CiviCrmBuilder] Successfully loaded ${validBlocks.length} custom blocks from ${fetchUrl}. (${invalidCount} invalid ignored)`);
+    return { blocks: validBlocks, themeVariables };
 
   } catch (err) {
-    console.error(`[GrapesJsCustomPlugin] Network error while fetching blocks from ${fetchUrl}:`, err);
-    return [];
+    console.error(`[CiviCrmBuilder] Network error while fetching blocks from ${fetchUrl}:`, err);
+    return {blocks: [], themeVariables: {}};
   }
 }

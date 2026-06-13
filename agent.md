@@ -1,4 +1,4 @@
-# État du projet et Guide de Build - GrapesJsCustomPluginBundle
+# État du projet et Guide de Build - CiviCrmBuilderBundle
 
 Ce document décrit l'état actuel du projet et les étapes nécessaires pour compiler les assets.
 
@@ -51,3 +51,6 @@ Le projet utilise npm pour la gestion des dépendances frontend et la compilatio
 - `Config/` : Configuration du plugin Mautic.
 - `EventSubscriber/` : Abonnés aux événements Mautic (ex: injection d'assets).
 - `Integration/` : Logique d'intégration Mautic.
+
+## Règles de développement
+- **Interface utilisateur** : Ne pas utiliser d'émojis (✅, ❌, etc.) dans les messages destinés à l'utilisateur (messages d'erreur, de succès, `alert()`, `addFlashMessage()`, etc.). L'utilisation de Font Awesome dans GrapesJS reste cependant autorisée.

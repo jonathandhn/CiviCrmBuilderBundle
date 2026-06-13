@@ -11,15 +11,14 @@ declare global {
   }
 }
 
-const GrapesJsCustomPlugin = (editor: any, options: any) => {
-  console.info('🚀 [GrapesJsCustomPlugin] Plugin is booting...');
+const CiviCrmBuilder = (editor: any, options: any) => {
+  console.info('[CiviCrmBuilder] Plugin is booting...');
 
   // 1. Initialiser la configuration globale (GrapesJS)
 
-  // Configurer le GrapesJS interne
+  // Initialiser la configuration globale (GrapesJS)
   editor.on('load', () => {
-    configureGrapesJsColorPicker(editor);
-    configureGrapesJsTypography(editor);
+    // La configuration sera injectée après le chargement des blocs
   });
 
   // 2. Récupérer le contexte Mautic passé dans les options
@@ -49,7 +48,7 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
         else if (title.includes('Mautic') || title.includes('Thème')) {
           cat.style.display = mode === 'civicrm' ? 'none' : 'block';
         }
-        // Si c'est SOS générique, on affiche toujours
+        // Si c'est un custom, on affiche toujours
       });
     };
 
@@ -57,7 +56,7 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
     editor.Commands.add('set-mode-mautic', {
       run(e: any) {
         editorMode = 'mautic';
-        console.info('[GrapesJsCustomPlugin] Switched to Mautic Mode');
+        console.info('[CiviCrmBuilder] Switched to Mautic Mode');
         updateCategories('mautic');
       }
     });
@@ -66,7 +65,7 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
     editor.Commands.add('set-mode-civicrm', {
       run(e: any) {
         editorMode = 'civicrm';
-        console.info('[GrapesJsCustomPlugin] Switched to CiviCRM Mode');
+        console.info('[CiviCrmBuilder] Switched to CiviCRM Mode');
         updateCategories('civicrm');
       }
     });
@@ -99,7 +98,7 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
 
         // Mautic expose souvent context dans window.MauticGrapesJsPlugins
         if (window.MauticGrapesJsPlugins) {
-          const pluginDef = window.MauticGrapesJsPlugins.find((p: any) => p.name === 'GrapesJsCustomPlugin');
+          const pluginDef = window.MauticGrapesJsPlugins.find((p: any) => p.name === 'CiviCrmBuilder');
           if (pluginDef && pluginDef.context && pluginDef.context.length > 0) {
             // on prend le premier contexte qui matche
             if (pluginDef.context.includes('email-mjml')) {
@@ -111,8 +110,20 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
         }
 
         // Charger et enregistrer tous les blocs
-        loadCustomBlocks(themeName, currentContext).then(customBlocks => {
+        loadCustomBlocks(themeName, currentContext).then(({ blocks: customBlocks, themeVariables }) => {
+          configureGrapesJsColorPicker(editor, themeVariables);
+          configureGrapesJsTypography(editor, themeVariables);
+          
           registerBlocks(editor, customBlocks);
+
+          // Fermer les catégories natives et les mettre à la fin
+          const cats = editor.BlockManager.getCategories();
+          cats.each((cat: any) => {
+            const id = cat.get('id') || cat.get('label') || '';
+            if (!id.toLowerCase().includes('custom') && !id.toLowerCase().includes('civicrm')) {
+              cat.set('open', false);
+            }
+          });
 
           // Par défaut on applique le mode Mautic à la fin de l'initialisation
           editor.runCommand('set-mode-mautic');
@@ -154,11 +165,10 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
             return;
           }
 
-          fetch('/s/grapesjs-custom/theme-blocks/' + tName + '/save', {
+          fetch('/s/civicrm-builder/theme-blocks/' + tName + '/save', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest',
               'X-CSRF-Token': (window as any).mauticAjaxCsrf || ''
             },
             body: JSON.stringify({
@@ -167,14 +177,14 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
             })
           }).then(res => res.json()).then(data => {
             if (data.success) {
-              alert("✅ Bloc sauvegardé avec succès dans le thème " + tName + " ! Rafraîchissez la page pour le voir dans la section 'Blocs Sauvegardés'.");
+              alert("Bloc sauvegardé avec succès dans le thème " + tName + " ! Rafraîchissez la page pour le voir dans la section 'Blocs Sauvegardés'.");
             } else {
               const errMsg = data.error || (data.errors && data.errors[0] ? data.errors[0].message : JSON.stringify(data));
-              alert("❌ Erreur serveur : " + errMsg);
+              alert("Erreur serveur : " + errMsg);
             }
           }).catch(err => {
             console.error(err);
-            alert("❌ Erreur réseau lors de la sauvegarde du bloc.");
+            alert("Erreur réseau lors de la sauvegarde du bloc.");
           });
         }
       });
@@ -183,10 +193,10 @@ const GrapesJsCustomPlugin = (editor: any, options: any) => {
   });
 };
 
-export default GrapesJsCustomPlugin;
+export default CiviCrmBuilder;
 
 // 1. Initialiser la configuration globale (CKEditor) IMMEDIATEMENT !
-// Sinon Mautic charge CKEditor avant que notre plugin GrapesJS ne s'initialise.
+// Mautic charge CKEditor avant que GrapesJS ne finisse de booter.
 applyCkeditorThemeConfig();
 
 // Injection dans Mautic
@@ -195,8 +205,8 @@ if (!window.MauticGrapesJsPlugins) {
 }
 
 window.MauticGrapesJsPlugins.push({
-  name: 'GrapesJsCustomPlugin',
-  plugin: GrapesJsCustomPlugin,
+  name: 'CiviCrmBuilder',
+  plugin: CiviCrmBuilder,
   context: ['page', 'email-mjml'],
   pluginOptions: {
     options: {

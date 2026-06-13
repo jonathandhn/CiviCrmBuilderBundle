@@ -39,6 +39,6 @@ export const sectionWithBorder = 'background-color="#ffffff" border-bottom="2px 
 
 export function getStaticBlocks(categories: any): any[] {
     // Tous les blocs sont désormais gérés par le système JSON (customBlockLoader)
-    // dans le répertoire /themes/sos_mjml/blocks/
+    // dans le répertoire /themes/[votre_theme]/blocks/
     return [];
 }

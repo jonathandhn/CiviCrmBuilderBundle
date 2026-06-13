@@ -1,20 +1,20 @@
 {
-  "name": "mautic/grapesjs-custom-plugin",
+  "name": "mautic/civicrm-builder-plugin",
   "description": "Test bundle to add a custom GrapesJS plugin to the Mautic Builder",
   "type": "mautic-plugin",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "extra": {
-    "install-directory-name": "GrapesJsCustomPluginBundle"
+    "install-directory-name": "CiviCrmBuilderBundle"
   },
   "autoload": {
     "psr-4": {
-      "MauticPlugin\\GrapesJsCustomPluginBundle\\": ""
+      "MauticPlugin\\CiviCrmBuilderBundle\\": ""
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "MauticPlugin\\GrapesJsCustomPluginBundle\\Tests\\": "Tests"
+      "MauticPlugin\\CiviCrmBuilderBundle\\Tests\\": "Tests"
     }
   }
 }

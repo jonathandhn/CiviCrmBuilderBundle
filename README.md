@@ -1,4 +1,4 @@
-# GrapesJsCustomPluginBundle
+# CiviCrmBuilderBundle
 
 ## About the demo-plugin
 This is a Mautic-Plugin to demonstrate how [3rd party](https://gjs.market/) or custom GrapesJS plugins can be added to Mautic's editor.

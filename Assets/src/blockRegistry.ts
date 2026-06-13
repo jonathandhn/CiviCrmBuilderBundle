@@ -7,12 +7,12 @@ export function registerBlocks(editor: any, customBlocks: CustomBlock[]) {
 
     // Définition des catégories
     const categories = {
-        catMauticElements: blockManager.getCategories().add({ id: 'sos-mautic-elements', label: 'Thème Mautic - Éléments', open: false }),
-        catMauticStructures: blockManager.getCategories().add({ id: 'sos-mautic-structures', label: 'Thème Mautic - Structures', open: false }),
-        catCiviElements: blockManager.getCategories().add({ id: 'sos-civicrm-elements', label: 'CiviCRM - Éléments', open: true }),
-        catCiviStructures: blockManager.getCategories().add({ id: 'sos-civicrm-structures', label: 'CiviCRM - Structures', open: false }),
-        categoryElements: blockManager.getCategories().add({ id: 'sos-elements', label: 'Éléments SOS', open: false }),
-        categoryStructures: blockManager.getCategories().add({ id: 'sos-structures', label: 'Structures SOS', open: false }),
+        catMauticElements: blockManager.getCategories().add({ id: 'mautic-elements', label: 'Thème Mautic - Éléments', open: true }),
+        catMauticStructures: blockManager.getCategories().add({ id: 'mautic-structures', label: 'Thème Mautic - Structures', open: true }),
+        catCiviElements: blockManager.getCategories().add({ id: 'civicrm-elements', label: 'CiviCRM - Éléments', open: true }),
+        catCiviStructures: blockManager.getCategories().add({ id: 'civicrm-structures', label: 'CiviCRM - Structures', open: true }),
+        categoryElements: blockManager.getCategories().add({ id: 'custom-elements', label: 'Éléments', open: true }),
+        categoryStructures: blockManager.getCategories().add({ id: 'custom-structures', label: 'Structures', open: true }),
     };
 
     // 1. Enregistrement du composant GrapesJS Smarty
@@ -26,7 +26,7 @@ export function registerBlocks(editor: any, customBlocks: CustomBlock[]) {
 
     // 3. Chargement des blocs custom JSON
     customBlocks.forEach(block => {
-        // Résolution de la catégorie si le JSON référence un ID de catégorie connu (ex: "sos-civicrm-elements")
+        // Résolution de la catégorie si le JSON référence un ID de catégorie connu (ex: "civicrm-elements")
         // ou utilisation directe du string fourni.
         let targetCategory = block.category;
         for (const [key, catObj] of Object.entries(categories)) {
@@ -34,6 +34,10 @@ export function registerBlocks(editor: any, customBlocks: CustomBlock[]) {
                 targetCategory = catObj.id;
                 break;
             }
+        }
+        
+        if(block.id.toLowerCase().includes("civicrm")){ 
+            targetCategory = block.category.includes("Structures") ? categories.catCiviStructures.id : categories.catCiviElements.id; 
         }
 
         // Déterminer l'icône automatiquement
@@ -57,5 +61,5 @@ export function registerBlocks(editor: any, customBlocks: CustomBlock[]) {
         });
     });
 
-    console.info(`[GrapesJsCustomPlugin] Registered ${staticBlocks.length} static blocks and ${customBlocks.length} custom blocks.`);
+    console.info(`[CiviCrmBuilder] Registered ${staticBlocks.length} static blocks and ${customBlocks.length} custom blocks.`);
 }

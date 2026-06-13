@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\Integration;
+namespace MauticPlugin\CiviCrmBuilderBundle\Integration;
 
 use Mautic\IntegrationsBundle\Exception\IntegrationNotFoundException;
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
@@ -50,7 +50,7 @@ class Config
      */
     public function getIntegrationEntity(): Integration
     {
-        $integrationObject = $this->integrationsHelper->getIntegration(GrapesJsCustomPluginIntegration::NAME);
+        $integrationObject = $this->integrationsHelper->getIntegration(CiviCrmBuilderIntegration::NAME);
 
         return $integrationObject->getIntegrationConfiguration();
     }

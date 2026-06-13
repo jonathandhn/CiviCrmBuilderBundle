@@ -1,1 +1,467 @@
-"use strict";(()=>{function y(){if(window.Mautic&&window.Mautic.GetCkEditorConfigOptions&&!window._ckeditorPatched){let n=window.Mautic.GetCkEditorConfigOptions;window.Mautic.GetCkEditorConfigOptions=function(){let e=n.apply(this,arguments),s=[{color:"#ea148c",label:"Magenta SOS"},{color:"#00577b",label:"Bleu Cobalt"},{color:"#ffcf1a",label:"Jaune"},{color:"#2e78cc",label:"Bleu Azur"},{color:"#ffffff",label:"Blanc",hasBorder:!0},{color:"#000000",label:"Noir"}];return e.fontColor=e.fontColor||{},e.fontColor.colors=s,e.fontBackgroundColor=e.fontBackgroundColor||{},e.fontBackgroundColor.colors=s,e.fontFamily=e.fontFamily||{},e.fontFamily.options=["Par d\xE9faut","Roboto, Arial, sans-serif"],e.fontFamily.supportAllValues=!0,e.toolbar&&(Array.isArray(e.toolbar)?e.toolbar.includes("removeFormat")||e.toolbar.push("removeFormat"):e.toolbar.items&&Array.isArray(e.toolbar.items)&&(e.toolbar.items.includes("removeFormat")||e.toolbar.items.push("removeFormat"))),e},window._ckeditorPatched=!0,console.info("[GrapesJsCustomPlugin] CKEditor config patched with custom fonts/colors.")}}function C(n){n.Config&&(n.Config.colorPicker={...n.Config.colorPicker||{},palette:[["#ea148c","#00577b","#ffcf1a","#2e78cc","#ffffff","#000000"]]})}function v(n){let s=n.StyleManager.getProperty("typography","font-family");s&&(s.set("options",[{value:"Roboto, Arial, sans-serif",name:"Roboto"}]),s.set("value","Roboto, Arial, sans-serif"))}function g(n){let e=n||"";if(console.info("[GrapesJsCustomPlugin] Resolving theme..."),e)console.info("[GrapesJsCustomPlugin] Theme resolved from explicit config:",e);else try{let s=document.querySelector("#emailform_template")||document.querySelector("#campaignevent_template")||document.querySelector("#page_template");if(s&&(e=s.value,e&&console.info("[GrapesJsCustomPlugin] Theme resolved from local DOM:",e)),!e&&window.parent&&window.parent.document){let i=window.parent.document.querySelector("#emailform_template")||window.parent.document.querySelector("#campaignevent_template")||window.parent.document.querySelector("#page_template");i&&(e=i.value,e&&console.info("[GrapesJsCustomPlugin] Theme resolved from window.parent DOM:",e))}}catch(s){console.warn("[GrapesJsCustomPlugin] Error while checking DOM for theme:",s)}return e||(e="sos_mjml",console.warn("[GrapesJsCustomPlugin] Theme not found in DOM, using fallback theme:",e)),e}async function b(n,e="email-mjml"){console.info(`\u23F3 [GrapesJsCustomPlugin] Fetching custom JSON blocks for theme "${n}"...`);let s="/s/grapesjs-custom/theme-blocks/"+n;try{let i=await fetch(s);if(!i.ok)return console.error(`[GrapesJsCustomPlugin] HTTP Error ${i.status} while fetching blocks from ${s}`),[];let f=await i.text(),o;try{o=JSON.parse(f)}catch(t){return console.error("[GrapesJsCustomPlugin] Failed to parse JSON response:",t),[]}if(!Array.isArray(o))return console.error("[GrapesJsCustomPlugin] Invalid response format. Expected an array of blocks."),[];let m=[],a=0;return o.forEach(t=>{if(t&&typeof t=="object"&&t.id&&t.content){if(t.context&&Array.isArray(t.context)&&!t.context.includes(e))return;m.push({id:t.id,label:t.label||t.id,category:t.category||"Th\xE8me Mautic",content:t.content,attributes:t.attributes||{class:"fa fa-cube"},order:t.order})}else a++,console.warn("[GrapesJsCustomPlugin] Ignoring invalid JSON block:",t)}),console.info(`[GrapesJsCustomPlugin] Successfully loaded ${m.length} custom blocks from ${s}. (${a} invalid ignored)`),m}catch(i){return console.error(`[GrapesJsCustomPlugin] Network error while fetching blocks from ${s}:`,i),[]}}function w(n){return[]}function k(n,e){let s=n.BlockManager,i=n.DomComponents,f=n.Commands;i.addType("smarty-code",{isComponent:o=>o.tagName==="SMARTY-CODE",model:{defaults:{tagName:"div",attributes:{class:"smarty-code-wrapper"},components:"",smartyContent:"{* Ins\xE9rez votre code Smarty ici *}",traits:[{type:"text",name:"smartyContent",label:"Code Smarty"}],style:{padding:"10px",border:"1px dashed #ea148c","background-color":"#f9f9f9",color:"#ea148c","font-family":"monospace"}},init(){this.on("change:smartyContent",this.handleSmartyChange),this.handleSmartyChange()},handleSmartyChange(){let o=this.get("smartyContent")||"";this.components(o)}},view:{onRender(){let o=document.createElement("button");o.innerHTML="\xC9diter Smarty",o.style.position="absolute",o.style.top="0",o.style.right="0",o.style.background="#ea148c",o.style.color="#fff",o.style.border="none",o.style.padding="2px 5px",o.style.fontSize="10px",o.style.cursor="pointer",o.style.zIndex="10",o.onclick=()=>{n.runCommand("edit-smarty-code",{target:this.model})},this.el.style.position="relative",this.el.appendChild(o)}}}),f.add("edit-smarty-code",{run(o,m,a){let t=a.target,r=t.get("smartyContent")||"",c=document.createElement("div"),l=document.createElement("textarea");l.style.width="100%",l.style.height="200px",l.value=r;let u=document.createElement("button");u.innerHTML="Sauvegarder",u.style.marginTop="10px",u.className="gjs-btn-prim",u.onclick=()=>{t.set("smartyContent",l.value),o.Modal.close()},c.appendChild(l),c.appendChild(u),o.Modal.setTitle("\xC9diter le code Smarty").setContent(c).open()}}),s.add("smarty-code-block",{label:"Smarty Code",category:e,attributes:{class:"fa fa-code"},content:{type:"smarty-code"}})}function h(n,e){let s=n.BlockManager,i={catMauticElements:s.getCategories().add({id:"sos-mautic-elements",label:"Th\xE8me Mautic - \xC9l\xE9ments",open:!1}),catMauticStructures:s.getCategories().add({id:"sos-mautic-structures",label:"Th\xE8me Mautic - Structures",open:!1}),catCiviElements:s.getCategories().add({id:"sos-civicrm-elements",label:"CiviCRM - \xC9l\xE9ments",open:!0}),catCiviStructures:s.getCategories().add({id:"sos-civicrm-structures",label:"CiviCRM - Structures",open:!1}),categoryElements:s.getCategories().add({id:"sos-elements",label:"\xC9l\xE9ments SOS",open:!1}),categoryStructures:s.getCategories().add({id:"sos-structures",label:"Structures SOS",open:!1})};k(n,i.catCiviElements.id);let f=w(i);f.forEach(o=>{s.add(o.id,o)}),e.forEach(o=>{let m=o.category;for(let[r,c]of Object.entries(i))if(c.id===o.category||c.get("label")===o.category){m=c.id;break}let a="fa fa-cube",t=o.id.toLowerCase();t.includes("header")?a="fa fa-header":t.includes("footer")?a="fa fa-shoe-prints":t.includes("title")?a="fa fa-h-square":t.includes("text")?a="fa fa-font":t.includes("button")?a="fa fa-link":t.includes("divider")?a="fa fa-minus":t.includes("spacer")?a="fa fa-arrows-v":t.includes("section")||t.includes("col")?a="fa fa-columns":t.includes("unsubscribe")&&(a="fa fa-ban"),s.add(o.id,{label:o.label||o.id,category:m,attributes:o.attributes||{class:a},content:o.content})}),console.info(`[GrapesJsCustomPlugin] Registered ${f.length} static blocks and ${e.length} custom blocks.`)}var M=(n,e)=>{console.info("\u{1F680} [GrapesJsCustomPlugin] Plugin is booting..."),n.on("load",()=>{C(n),v(n)});let i=(e.options||{}).grapesjsBuilder||null,f="mautic";n.on("load",()=>{let o=a=>{let t=n.getContainer();if(!t)return;t.querySelectorAll(".gjs-block-category").forEach(c=>{let l=c.querySelector(".gjs-title");if(!l)return;let u=l.innerText||l.textContent;u.includes("CiviCRM")?c.style.display=a==="mautic"?"none":"block":(u.includes("Mautic")||u.includes("Th\xE8me"))&&(c.style.display=a==="civicrm"?"none":"block")})};n.Commands.add("set-mode-mautic",{run(a){f="mautic",console.info("[GrapesJsCustomPlugin] Switched to Mautic Mode"),o("mautic")}}),n.Commands.add("set-mode-civicrm",{run(a){f="civicrm",console.info("[GrapesJsCustomPlugin] Switched to CiviCRM Mode"),o("civicrm")}});let m=n.Panels;m.addButton("options",{id:"btn-mode-mautic",className:"fa fa-envelope",command:"set-mode-mautic",attributes:{title:"Mode Mautic"},active:!0}),m.addButton("options",{id:"btn-mode-civicrm",className:"fa fa-users",command:"set-mode-civicrm",attributes:{title:"Mode CiviCRM"},active:!1}),setTimeout(()=>{let a=g();if(a){let t="email-mjml";if(window.MauticGrapesJsPlugins){let r=window.MauticGrapesJsPlugins.find(c=>c.name==="GrapesJsCustomPlugin");r&&r.context&&r.context.length>0&&(r.context.includes("email-mjml")?t="email-mjml":r.context.includes("page")&&(t="page"))}b(a,t).then(r=>{h(n,r),n.runCommand("set-mode-mautic")})}else h(n,[]),n.runCommand("set-mode-mautic");n.on("component:selected",t=>{let r=t.get("toolbar");r.find(l=>l.id==="save-block")||(r.unshift({id:"save-block",attributes:{class:"fa fa-floppy-o",title:"Sauvegarder ce bloc"},command:"save-block-cmd"}),t.set("toolbar",r))}),n.Commands.add("save-block-cmd",{run(t,r,c){let l=t.getSelected();if(!l)return;let u=prompt("Nom du nouveau bloc ?","Mon Bloc Personnalis\xE9");if(!u)return;let x=l.toHTML(),p=g();if(!p){alert("Erreur : Aucun th\xE8me actif d\xE9tect\xE9.");return}fetch("/s/grapesjs-custom/theme-blocks/"+p+"/save",{method:"POST",headers:{"Content-Type":"application/json","X-Requested-With":"XMLHttpRequest","X-CSRF-Token":window.mauticAjaxCsrf||""},body:JSON.stringify({label:u,content:x})}).then(d=>d.json()).then(d=>{if(d.success)alert("\u2705 Bloc sauvegard\xE9 avec succ\xE8s dans le th\xE8me "+p+" ! Rafra\xEEchissez la page pour le voir dans la section 'Blocs Sauvegard\xE9s'.");else{let S=d.error||(d.errors&&d.errors[0]?d.errors[0].message:JSON.stringify(d));alert("\u274C Erreur serveur : "+S)}}).catch(d=>{console.error(d),alert("\u274C Erreur r\xE9seau lors de la sauvegarde du bloc.")})}})},500)})},N=M;y();window.MauticGrapesJsPlugins||(window.MauticGrapesJsPlugins=[]);window.MauticGrapesJsPlugins.push({name:"GrapesJsCustomPlugin",plugin:M,context:["page","email-mjml"],pluginOptions:{options:{test:!0}}});})();
+"use strict";
+(() => {
+  // Assets/src/themeResolver.ts
+  function resolveTheme(explicitTheme) {
+    let themeName = explicitTheme || "";
+    console.info("[CiviCrmBuilder] Resolving theme...");
+    if (!themeName) {
+      try {
+        const input = document.querySelector("#emailform_template") || document.querySelector("#campaignevent_template") || document.querySelector("#page_template");
+        if (input) {
+          themeName = input.value;
+          if (themeName) console.info("[CiviCrmBuilder] Theme resolved from local DOM:", themeName);
+        }
+        if (!themeName && window.parent && window.parent.document) {
+          const pInput = window.parent.document.querySelector("#emailform_template") || window.parent.document.querySelector("#campaignevent_template") || window.parent.document.querySelector("#page_template");
+          if (pInput) {
+            themeName = pInput.value;
+            if (themeName) console.info("[CiviCrmBuilder] Theme resolved from window.parent DOM:", themeName);
+          }
+        }
+      } catch (e) {
+        console.warn("[CiviCrmBuilder] Error while checking DOM for theme:", e);
+      }
+    } else {
+      console.info("[CiviCrmBuilder] Theme resolved from explicit config:", themeName);
+    }
+    if (!themeName) {
+      themeName = "blank";
+      console.warn("[CiviCrmBuilder] Theme not found in DOM, using fallback theme:", themeName);
+    }
+    return themeName;
+  }
+
+  // Assets/src/ckeditorThemeConfig.ts
+  var cachedThemeVars = null;
+  function applyCkeditorThemeConfig() {
+    if (window.Mautic && window.Mautic.GetCkEditorConfigOptions) {
+      const originalGetCk = window.Mautic.GetCkEditorConfigOptions;
+      window.Mautic.GetCkEditorConfigOptions = function() {
+        const config = originalGetCk.apply(this, arguments);
+        if (!cachedThemeVars) {
+          cachedThemeVars = {};
+          const themeName = resolveTheme();
+          if (themeName && themeName !== "blank") {
+            try {
+              const xhr = new XMLHttpRequest();
+              xhr.open("GET", "/themes/" + themeName + "/theme_variables.json", false);
+              xhr.send(null);
+              if (xhr.status === 200) {
+                cachedThemeVars = JSON.parse(xhr.responseText);
+              }
+            } catch (e) {
+              console.error("[CiviCrmBuilder] Failed to load theme_variables.json synchronously:", e);
+            }
+          }
+        }
+        const themeVars = cachedThemeVars;
+        const customColors = [];
+        for (const key in themeVars) {
+          if (key.startsWith("color_")) {
+            const colorVal = themeVars[key];
+            let label = key.replace("color_", "").replace(/_/g, " ");
+            label = label.charAt(0).toUpperCase() + label.slice(1);
+            customColors.push({ color: colorVal, label, hasBorder: colorVal.toLowerCase() === "#ffffff" });
+          }
+        }
+        if (customColors.length > 0) {
+          config.fontColor = config.fontColor || {};
+          config.fontColor.colors = customColors;
+          config.fontBackgroundColor = config.fontBackgroundColor || {};
+          config.fontBackgroundColor.colors = customColors;
+        }
+        if (themeVars.font_main) {
+          config.fontFamily = config.fontFamily || {};
+          config.fontFamily.options = [
+            "Par d\xE9faut",
+            themeVars.font_main
+          ];
+          config.fontFamily.supportAllValues = true;
+        }
+        if (config.toolbar) {
+          if (Array.isArray(config.toolbar)) {
+            if (!config.toolbar.includes("removeFormat")) config.toolbar.push("removeFormat");
+          } else if (config.toolbar.items && Array.isArray(config.toolbar.items)) {
+            if (!config.toolbar.items.includes("removeFormat")) config.toolbar.items.push("removeFormat");
+          }
+        }
+        return config;
+      };
+      window._ckeditorPatched = true;
+      console.info("[CiviCrmBuilder] CKEditor config patched with dynamic theme variables.");
+    }
+  }
+  function configureGrapesJsColorPicker(editor, themeVars = {}) {
+    const palette = [];
+    for (const key in themeVars) {
+      if (key.startsWith("color_")) {
+        palette.push(themeVars[key]);
+      }
+    }
+    if (palette.length > 0 && editor.Config) {
+      editor.Config.colorPicker = {
+        ...editor.Config.colorPicker || {},
+        palette: [palette]
+      };
+    }
+  }
+  function configureGrapesJsTypography(editor, themeVars = {}) {
+    if (themeVars.font_main) {
+      const styleManager = editor.StyleManager;
+      const fontProperty = styleManager.getProperty("typography", "font-family");
+      if (fontProperty) {
+        const fontName = themeVars.font_main.split(",")[0].trim();
+        fontProperty.set("options", [
+          { value: themeVars.font_main, name: fontName }
+        ]);
+        fontProperty.set("value", themeVars.font_main);
+      }
+    }
+  }
+
+  // Assets/src/customBlockLoader.ts
+  async function loadCustomBlocks(themeName, currentContext = "email-mjml") {
+    console.info(`\u23F3 [CiviCrmBuilder] Fetching custom JSON blocks for theme "${themeName}"...`);
+    const fetchUrl = "/s/civicrm-builder/theme-blocks/" + themeName;
+    try {
+      const response = await fetch(fetchUrl);
+      if (!response.ok) {
+        console.error(`[CiviCrmBuilder] HTTP Error ${response.status} while fetching blocks from ${fetchUrl}`);
+        return { blocks: [], themeVariables: {} };
+      }
+      const jsonText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(jsonText);
+      } catch (e) {
+        console.error("[CiviCrmBuilder] Failed to parse JSON response:", e);
+        return { blocks: [], themeVariables: {} };
+      }
+      let blocks = Array.isArray(data) ? data : data.blocks || [];
+      let themeVariables = data.theme_variables || {};
+      if (!Array.isArray(blocks)) {
+        console.error("[CiviCrmBuilder] Invalid response format. Expected an array of blocks.");
+        return { blocks: [], themeVariables: {} };
+      }
+      const validBlocks = [];
+      let invalidCount = 0;
+      blocks.forEach((b) => {
+        if (b && typeof b === "object" && b.id && b.content) {
+          if (b.context && Array.isArray(b.context)) {
+            if (!b.context.includes(currentContext)) {
+              return;
+            }
+          }
+          validBlocks.push({
+            id: b.id,
+            label: b.label || b.id,
+            category: b.category || "Th\xE8me Mautic",
+            content: b.content,
+            attributes: b.attributes || { class: "fa fa-cube" },
+            order: b.order
+          });
+        } else {
+          invalidCount++;
+          console.warn("[CiviCrmBuilder] Ignoring invalid JSON block:", b);
+        }
+      });
+      console.info(`[CiviCrmBuilder] Successfully loaded ${validBlocks.length} custom blocks from ${fetchUrl}. (${invalidCount} invalid ignored)`);
+      return { blocks: validBlocks, themeVariables };
+    } catch (err) {
+      console.error(`[CiviCrmBuilder] Network error while fetching blocks from ${fetchUrl}:`, err);
+      return { blocks: [], themeVariables: {} };
+    }
+  }
+
+  // Assets/src/civicrmBlocks.ts
+  function getStaticBlocks(categories) {
+    return [];
+  }
+
+  // Assets/src/smartyBlock.ts
+  function registerSmartyBlock(editor, catCiviElementsId) {
+    const blockManager = editor.BlockManager;
+    const domComponents = editor.DomComponents;
+    const commands = editor.Commands;
+    domComponents.addType("smarty-code", {
+      isComponent: (el) => el.tagName === "SMARTY-CODE",
+      model: {
+        defaults: {
+          tagName: "div",
+          attributes: { class: "smarty-code-wrapper" },
+          components: "",
+          smartyContent: "{* Ins\xE9rez votre code Smarty ici *}",
+          traits: [
+            {
+              type: "text",
+              name: "smartyContent",
+              label: "Code Smarty"
+            }
+          ],
+          style: {
+            padding: "10px",
+            border: "1px dashed #ea148c",
+            "background-color": "#f9f9f9",
+            color: "#ea148c",
+            "font-family": "monospace"
+          }
+        },
+        init() {
+          this.on("change:smartyContent", this.handleSmartyChange);
+          this.handleSmartyChange();
+        },
+        handleSmartyChange() {
+          const content = this.get("smartyContent") || "";
+          this.components(content);
+        }
+      },
+      view: {
+        onRender() {
+          const btn = document.createElement("button");
+          btn.innerHTML = "\xC9diter Smarty";
+          btn.style.position = "absolute";
+          btn.style.top = "0";
+          btn.style.right = "0";
+          btn.style.background = "#ea148c";
+          btn.style.color = "#fff";
+          btn.style.border = "none";
+          btn.style.padding = "2px 5px";
+          btn.style.fontSize = "10px";
+          btn.style.cursor = "pointer";
+          btn.style.zIndex = "10";
+          btn.onclick = () => {
+            editor.runCommand("edit-smarty-code", { target: this.model });
+          };
+          this.el.style.position = "relative";
+          this.el.appendChild(btn);
+        }
+      }
+    });
+    commands.add("edit-smarty-code", {
+      run(editor2, sender, options) {
+        const target = options.target;
+        const currentContent = target.get("smartyContent") || "";
+        const modalContent = document.createElement("div");
+        const textarea = document.createElement("textarea");
+        textarea.style.width = "100%";
+        textarea.style.height = "200px";
+        textarea.value = currentContent;
+        const saveBtn = document.createElement("button");
+        saveBtn.innerHTML = "Sauvegarder";
+        saveBtn.style.marginTop = "10px";
+        saveBtn.className = "gjs-btn-prim";
+        saveBtn.onclick = () => {
+          target.set("smartyContent", textarea.value);
+          editor2.Modal.close();
+        };
+        modalContent.appendChild(textarea);
+        modalContent.appendChild(saveBtn);
+        editor2.Modal.setTitle("\xC9diter le code Smarty").setContent(modalContent).open();
+      }
+    });
+    blockManager.add("smarty-code-block", {
+      label: "Smarty Code",
+      category: catCiviElementsId,
+      attributes: { class: "fa fa-code" },
+      content: { type: "smarty-code" }
+    });
+  }
+
+  // Assets/src/blockRegistry.ts
+  function registerBlocks(editor, customBlocks) {
+    const blockManager = editor.BlockManager;
+    const categories = {
+      catMauticElements: blockManager.getCategories().add({ id: "mautic-elements", label: "Th\xE8me Mautic - \xC9l\xE9ments", open: true }),
+      catMauticStructures: blockManager.getCategories().add({ id: "mautic-structures", label: "Th\xE8me Mautic - Structures", open: true }),
+      catCiviElements: blockManager.getCategories().add({ id: "civicrm-elements", label: "CiviCRM - \xC9l\xE9ments", open: true }),
+      catCiviStructures: blockManager.getCategories().add({ id: "civicrm-structures", label: "CiviCRM - Structures", open: true }),
+      categoryElements: blockManager.getCategories().add({ id: "custom-elements", label: "\xC9l\xE9ments", open: true }),
+      categoryStructures: blockManager.getCategories().add({ id: "custom-structures", label: "Structures", open: true })
+    };
+    registerSmartyBlock(editor, categories.catCiviElements.id);
+    const staticBlocks = getStaticBlocks(categories);
+    staticBlocks.forEach((block) => {
+      blockManager.add(block.id, block);
+    });
+    customBlocks.forEach((block) => {
+      let targetCategory = block.category;
+      for (const [key, catObj] of Object.entries(categories)) {
+        if (catObj.id === block.category || catObj.get("label") === block.category) {
+          targetCategory = catObj.id;
+          break;
+        }
+      }
+      if (block.id.toLowerCase().includes("civicrm")) {
+        targetCategory = block.category.includes("Structures") ? categories.catCiviStructures.id : categories.catCiviElements.id;
+      }
+      let iconClass = "fa fa-cube";
+      const searchId = block.id.toLowerCase();
+      if (searchId.includes("header")) iconClass = "fa fa-header";
+      else if (searchId.includes("footer")) iconClass = "fa fa-shoe-prints";
+      else if (searchId.includes("title")) iconClass = "fa fa-h-square";
+      else if (searchId.includes("text")) iconClass = "fa fa-font";
+      else if (searchId.includes("button")) iconClass = "fa fa-link";
+      else if (searchId.includes("divider")) iconClass = "fa fa-minus";
+      else if (searchId.includes("spacer")) iconClass = "fa fa-arrows-v";
+      else if (searchId.includes("section") || searchId.includes("col")) iconClass = "fa fa-columns";
+      else if (searchId.includes("unsubscribe")) iconClass = "fa fa-ban";
+      blockManager.add(block.id, {
+        label: block.label || block.id,
+        category: targetCategory,
+        attributes: block.attributes || { class: iconClass },
+        content: block.content
+      });
+    });
+    console.info(`[CiviCrmBuilder] Registered ${staticBlocks.length} static blocks and ${customBlocks.length} custom blocks.`);
+  }
+
+  // Assets/src/index.ts
+  var CiviCrmBuilder = (editor, options) => {
+    console.info("[CiviCrmBuilder] Plugin is booting...");
+    editor.on("load", () => {
+    });
+    const mauticOptions = options.options || {};
+    const grapesjsBuilder = mauticOptions.grapesjsBuilder || null;
+    let editorMode = "mautic";
+    editor.on("load", () => {
+      const updateCategories = (mode) => {
+        const container = editor.getContainer();
+        if (!container) return;
+        const categories = container.querySelectorAll(".gjs-block-category");
+        categories.forEach((cat) => {
+          const titleEl = cat.querySelector(".gjs-title");
+          if (!titleEl) return;
+          const title = titleEl.innerText || titleEl.textContent;
+          if (title.includes("CiviCRM")) {
+            cat.style.display = mode === "mautic" ? "none" : "block";
+          } else if (title.includes("Mautic") || title.includes("Th\xE8me")) {
+            cat.style.display = mode === "civicrm" ? "none" : "block";
+          }
+        });
+      };
+      editor.Commands.add("set-mode-mautic", {
+        run(e) {
+          editorMode = "mautic";
+          console.info("[CiviCrmBuilder] Switched to Mautic Mode");
+          updateCategories("mautic");
+        }
+      });
+      editor.Commands.add("set-mode-civicrm", {
+        run(e) {
+          editorMode = "civicrm";
+          console.info("[CiviCrmBuilder] Switched to CiviCRM Mode");
+          updateCategories("civicrm");
+        }
+      });
+      const panels = editor.Panels;
+      panels.addButton("options", {
+        id: "btn-mode-mautic",
+        className: "fa fa-envelope",
+        command: "set-mode-mautic",
+        attributes: { title: "Mode Mautic" },
+        active: true
+      });
+      panels.addButton("options", {
+        id: "btn-mode-civicrm",
+        className: "fa fa-users",
+        command: "set-mode-civicrm",
+        attributes: { title: "Mode CiviCRM" },
+        active: false
+      });
+      setTimeout(() => {
+        const themeName = resolveTheme();
+        if (themeName) {
+          let currentContext = "email-mjml";
+          if (window.MauticGrapesJsPlugins) {
+            const pluginDef = window.MauticGrapesJsPlugins.find((p) => p.name === "CiviCrmBuilder");
+            if (pluginDef && pluginDef.context && pluginDef.context.length > 0) {
+              if (pluginDef.context.includes("email-mjml")) {
+                currentContext = "email-mjml";
+              } else if (pluginDef.context.includes("page")) {
+                currentContext = "page";
+              }
+            }
+          }
+          loadCustomBlocks(themeName, currentContext).then(({ blocks: customBlocks, themeVariables }) => {
+            configureGrapesJsColorPicker(editor, themeVariables);
+            configureGrapesJsTypography(editor, themeVariables);
+            registerBlocks(editor, customBlocks);
+            const cats = editor.BlockManager.getCategories();
+            cats.each((cat) => {
+              const id = cat.get("id") || cat.get("label") || "";
+              if (!id.toLowerCase().includes("custom") && !id.toLowerCase().includes("civicrm")) {
+                cat.set("open", false);
+              }
+            });
+            editor.runCommand("set-mode-mautic");
+          });
+        } else {
+          registerBlocks(editor, []);
+          editor.runCommand("set-mode-mautic");
+        }
+        editor.on("component:selected", (model) => {
+          const tb = model.get("toolbar");
+          const hasSave = tb.find((tbItem) => tbItem.id === "save-block");
+          if (!hasSave) {
+            tb.unshift({
+              id: "save-block",
+              attributes: { class: "fa fa-floppy-o", title: "Sauvegarder ce bloc" },
+              command: "save-block-cmd"
+            });
+            model.set("toolbar", tb);
+          }
+        });
+        editor.Commands.add("save-block-cmd", {
+          run(editor2, sender, opts) {
+            const selected = editor2.getSelected();
+            if (!selected) return;
+            const blockName = prompt("Nom du nouveau bloc ?", "Mon Bloc Personnalis\xE9");
+            if (!blockName) return;
+            const content = selected.toHTML();
+            const tName = resolveTheme();
+            if (!tName) {
+              alert("Erreur : Aucun th\xE8me actif d\xE9tect\xE9.");
+              return;
+            }
+            fetch("/s/civicrm-builder/theme-blocks/" + tName + "/save", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-Token": window.mauticAjaxCsrf || ""
+              },
+              body: JSON.stringify({
+                label: blockName,
+                content
+              })
+            }).then((res) => res.json()).then((data) => {
+              if (data.success) {
+                alert("Bloc sauvegard\xE9 avec succ\xE8s dans le th\xE8me " + tName + " ! Rafra\xEEchissez la page pour le voir dans la section 'Blocs Sauvegard\xE9s'.");
+              } else {
+                const errMsg = data.error || (data.errors && data.errors[0] ? data.errors[0].message : JSON.stringify(data));
+                alert("Erreur serveur : " + errMsg);
+              }
+            }).catch((err) => {
+              console.error(err);
+              alert("Erreur r\xE9seau lors de la sauvegarde du bloc.");
+            });
+          }
+        });
+      }, 500);
+    });
+  };
+  var index_default = CiviCrmBuilder;
+  applyCkeditorThemeConfig();
+  if (!window.MauticGrapesJsPlugins) {
+    window.MauticGrapesJsPlugins = [];
+  }
+  window.MauticGrapesJsPlugins.push({
+    name: "CiviCrmBuilder",
+    plugin: CiviCrmBuilder,
+    context: ["page", "email-mjml"],
+    pluginOptions: {
+      options: {
+        test: true
+      }
+    }
+  });
+})();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\Controller;
+namespace MauticPlugin\CiviCrmBuilderBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,7 +13,7 @@ class CiviCrmController extends CommonController
     public function tokensAction(): JsonResponse
     {
         $db = $this->doctrine->getConnection();
-        $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
+        $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
         $settings = $settingsStr ? unserialize($settingsStr) : [];
         if (!is_array($settings)) {
             $settings = [];
@@ -95,7 +95,7 @@ class CiviCrmController extends CommonController
 
     public function pushAction(int $objectId)
     {
-        if (!$this->security->isGranted('grapesjscustomplugin:civicrm:push_draft')) {
+        if (!$this->security->isGranted('civicrmbuilder:civicrm:push_draft')) {
             return $this->accessDenied();
         }
 
@@ -110,7 +110,7 @@ class CiviCrmController extends CommonController
             return $this->redirect($this->generateUrl('mautic_email_index'));
         }
 
-        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
+        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
         $settings = $settingsStr ? unserialize($settingsStr) : [];
         if (!is_array($settings)) {
             $settings = [];
@@ -231,10 +231,10 @@ class CiviCrmController extends CommonController
             if ($returnedId && $returnedId !== $civiMailingId) {
                 $settings['integration']['email_mappings'][$objectId] = $returnedId;
                 $db = $this->doctrine->getConnection();
-                $db->update('plugin_integration_settings', ['feature_settings' => serialize($settings)], ['name' => 'GrapesJsCustomPlugin']);
+                $db->update('plugin_integration_settings', ['feature_settings' => serialize($settings)], ['name' => 'CiviCrmBuilder']);
             }
             $actionWord = $isUpdate ? 'mis à jour' : 'créé';
-            $this->addFlashMessage('✅ Brouillon "' . $name . '" ' . $actionWord . ' avec succès dans CiviCRM !');
+            $this->addFlashMessage('Brouillon "' . $name . '" ' . $actionWord . ' avec succès dans CiviCRM !');
         } else {
             $errorMessage = $data['error_message'] ?? 'Erreur inconnue';
             $this->addFlashMessage('Erreur lors de l\'action dans CiviCRM : ' . $errorMessage, [], 'error');
@@ -246,7 +246,7 @@ class CiviCrmController extends CommonController
 
     public function pushTemplateAction(int $objectId)
     {
-        if (!$this->security->isGranted('grapesjscustomplugin:civicrm:push_template')) {
+        if (!$this->security->isGranted('civicrmbuilder:civicrm:push_template')) {
             return $this->accessDenied();
         }
 
@@ -256,7 +256,7 @@ class CiviCrmController extends CommonController
             return $this->redirect($this->generateUrl('mautic_email_index'));
         }
 
-        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
+        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
         $settings = $settingsStr ? unserialize($settingsStr) : [];
         if (!is_array($settings)) {
             $settings = [];
@@ -373,11 +373,11 @@ class CiviCrmController extends CommonController
             if ($returnedId && $returnedId !== $civiTemplateId) {
                 $settings['integration']['template_mappings'][$objectId] = $returnedId;
                 $db = $this->doctrine->getConnection();
-                $db->update('plugin_integration_settings', ['feature_settings' => serialize($settings)], ['name' => 'GrapesJsCustomPlugin']);
+                $db->update('plugin_integration_settings', ['feature_settings' => serialize($settings)], ['name' => 'CiviCrmBuilder']);
             }
             $actionWord = $isUpdate ? 'mis à jour' : 'créé';
             $this->addFlashMessage('Modèle de message correctement poussé vers CiviCRM.', [], 'notice');
-            $this->addFlashMessage('✅ Modèle de message "' . $name . '" ' . $actionWord . ' avec succès dans CiviCRM !');
+            $this->addFlashMessage('Modèle de message "' . $name . '" ' . $actionWord . ' avec succès dans CiviCRM !');
         } else {
             $errorMessage = $data['error_message'] ?? 'Erreur inconnue';
             $this->addFlashMessage('Erreur lors de l\'action sur le modèle CiviCRM : ' . $errorMessage, [], 'error');
@@ -389,12 +389,12 @@ class CiviCrmController extends CommonController
 
     public function linkModalAction(int $objectId)
     {
-        if (!$this->security->isGranted('grapesjscustomplugin:civicrm:link_template')) {
+        if (!$this->security->isGranted('civicrmbuilder:civicrm:link_template')) {
             return $this->accessDenied();
         }
 
         return $this->delegateView([
-            'contentTemplate' => '@GrapesJsCustomPlugin/CiviCrm/link_modal.html.twig',
+            'contentTemplate' => '@CiviCrmBuilder/CiviCrm/link_modal.html.twig',
             'viewParameters'  => [
                 'objectId' => $objectId,
             ],
@@ -403,7 +403,7 @@ class CiviCrmController extends CommonController
 
     public function searchTemplateAction(Request $request): JsonResponse
     {
-        if (!$this->security->isGranted('grapesjscustomplugin:civicrm:link_template')) {
+        if (!$this->security->isGranted('civicrmbuilder:civicrm:link_template')) {
             return new JsonResponse(['error' => 'Accès refusé'], 403);
         }
 
@@ -412,7 +412,7 @@ class CiviCrmController extends CommonController
             return new JsonResponse(['success' => true, 'data' => []]);
         }
 
-        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
+        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
         $settings = $settingsStr ? unserialize($settingsStr) : [];
         $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
         $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
@@ -455,7 +455,7 @@ class CiviCrmController extends CommonController
 
     public function linkTemplateAction(int $objectId, Request $request): JsonResponse
     {
-        if (!$this->security->isGranted('grapesjscustomplugin:civicrm:link_template')) {
+        if (!$this->security->isGranted('civicrmbuilder:civicrm:link_template')) {
             return new JsonResponse(['success' => false, 'message' => 'Accès refusé'], 403);
         }
 
@@ -467,7 +467,7 @@ class CiviCrmController extends CommonController
 
         try {
             $db = $this->doctrine->getConnection();
-            $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'GrapesJsCustomPlugin'");
+            $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
             $settings = $settingsStr ? unserialize($settingsStr) : [];
             if (!is_array($settings)) $settings = [];
 
@@ -478,7 +478,7 @@ class CiviCrmController extends CommonController
             $settings['integration']['email_mappings'][$objectId] = $civiTemplateId;
 
             $db->executeStatement(
-                "UPDATE plugin_integration_settings SET feature_settings = :settings WHERE name = 'GrapesJsCustomPlugin'",
+                "UPDATE plugin_integration_settings SET feature_settings = :settings WHERE name = 'CiviCrmBuilder'",
                 ['settings' => serialize($settings)]
             );
 
@@ -497,10 +497,10 @@ class CiviCrmController extends CommonController
         $themeDir = $projectDir . '/themes/' . $theme;
         $blocksDir = $themeDir . '/blocks';
 
-        error_log("[GrapesJsCustomPlugin] Fetching blocks for theme: {$theme} from {$blocksDir}");
+        error_log("[CiviCrmBuilder] Fetching blocks for theme: {$theme} from {$blocksDir}");
 
         if (!is_dir($blocksDir)) {
-            error_log("[GrapesJsCustomPlugin] Blocks directory not found: {$blocksDir}");
+            error_log("[CiviCrmBuilder] Blocks directory not found: {$blocksDir}");
             return new JsonResponse([]);
         }
 
@@ -536,7 +536,7 @@ class CiviCrmController extends CommonController
                 if ($blockData) {
                     $blocks[] = $blockData;
                 } else {
-                    error_log("[GrapesJsCustomPlugin] Failed to parse JSON block file: {$filePath}");
+                    error_log("[CiviCrmBuilder] Failed to parse JSON block file: {$filePath}");
                 }
             } elseif ($ext === 'html' || $ext === 'twig') {
                 $id = pathinfo($filePath, PATHINFO_FILENAME);
@@ -557,8 +557,11 @@ class CiviCrmController extends CommonController
             }
         }
 
-        error_log("[GrapesJsCustomPlugin] Successfully loaded " . count($blocks) . " blocks for theme: {$theme}");
-        return new JsonResponse($blocks);
+        error_log("[CiviCrmBuilder] Successfully loaded " . count($blocks) . " blocks for theme: {$theme}");
+        return new JsonResponse([
+            'blocks' => $blocks,
+            'theme_variables' => $variables
+        ]);
     }
 
     /**
@@ -569,7 +572,7 @@ class CiviCrmController extends CommonController
     public function saveThemeBlockAction(Request $request, string $theme): JsonResponse
     {
         // Require auth
-        if (!$this->security->isGranted('grapesjscustomplugin:civicrm:save_block')) {
+        if (!$this->security->isGranted('civicrmbuilder:civicrm:save_block')) {
             return new JsonResponse(['success' => false, 'error' => 'You do not have permission to save custom blocks.'], 403);
         }
 

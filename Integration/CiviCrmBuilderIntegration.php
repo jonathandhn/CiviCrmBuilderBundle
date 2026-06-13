@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\GrapesJsCustomPluginBundle\Integration;
+namespace MauticPlugin\CiviCrmBuilderBundle\Integration;
 
 use Mautic\IntegrationsBundle\Integration\BasicIntegration;
 use Mautic\IntegrationsBundle\Integration\ConfigurationTrait;
 use Mautic\IntegrationsBundle\Integration\Interfaces\BasicInterface;
 
-class GrapesJsCustomPluginIntegration extends BasicIntegration implements BasicInterface
+class CiviCrmBuilderIntegration extends BasicIntegration implements BasicInterface
 {
     use ConfigurationTrait;
 
-    public const NAME         = 'grapesjscustomplugin';
-    public const DISPLAY_NAME = 'GrapesJS Custom-Plugin';
+    public const NAME         = 'civicrmbuilder';
+    public const DISPLAY_NAME = 'CiviCRM Builder';
 
     public function getName(): string
     {
@@ -27,6 +27,6 @@ class GrapesJsCustomPluginIntegration extends BasicIntegration implements BasicI
 
     public function getIcon(): string
     {
-        return 'plugins/GrapesJsCustomPluginBundle/Assets/img/icon.png';
+        return 'plugins/CiviCrmBuilderBundle/Assets/img/icon.png';
     }
 }

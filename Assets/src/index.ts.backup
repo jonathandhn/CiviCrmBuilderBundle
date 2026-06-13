@@ -3,59 +3,11 @@ import grapesjs from 'grapesjs';
 declare global {
   interface Window {
     MauticGrapesJsPlugins: object[];
-    Mautic: any;
-    _ckeditorPatched: boolean;
   }
 }
 
 export type PluginOptions = {};
 export type RequiredPluginOptions = Required<PluginOptions>;
-
-// Patch global : intercepter la configuration CKEditor de Mautic AVANT le chargement de GrapesJS
-if (window.Mautic && window.Mautic.GetCkEditorConfigOptions && !window._ckeditorPatched) {
-  const originalGetCk = window.Mautic.GetCkEditorConfigOptions;
-  window.Mautic.GetCkEditorConfigOptions = function() {
-    const config = originalGetCk.apply(this, arguments);
-    
-    // Couleurs de la charte officielle SOS Homophobie
-    const customColors = [
-        { color: '#ea148c', label: 'Magenta' },
-        { color: '#00577b', label: 'Bleu Cobalt' },
-        { color: '#ffcf1a', label: 'Jaune' },
-        { color: '#2e78cc', label: 'Bleu Azur' },
-        { color: '#ffffff', label: 'Blanc', hasBorder: true },
-        { color: '#000000', label: 'Noir' }
-    ];
-
-    config.fontColor = config.fontColor || {};
-    config.fontColor.colors = customColors;
-    
-    config.fontBackgroundColor = config.fontBackgroundColor || {};
-    config.fontBackgroundColor.colors = customColors;
-
-    // Forcer la police Roboto dans CKEditor (et exemples pour en ajouter)
-    config.fontFamily = config.fontFamily || {};
-    config.fontFamily.options = [
-        'Roboto, Arial, sans-serif' // Police par défaut forcée
-        // Exemple pour ajouter vos propres polices du template (décommenter et modifier) :
-        // 'Montserrat, Arial, sans-serif',
-        // 'Open Sans, Arial, sans-serif'
-    ];
-    config.fontFamily.supportAllValues = true;
-
-    // Force l'ajout de removeFormat dans la barre d'outils
-    if (config.toolbar) {
-        if (Array.isArray(config.toolbar)) {
-            if (!config.toolbar.includes('removeFormat')) config.toolbar.push('removeFormat');
-        } else if (config.toolbar.items && Array.isArray(config.toolbar.items)) {
-            if (!config.toolbar.items.includes('removeFormat')) config.toolbar.items.push('removeFormat');
-        }
-    }
-
-    return config;
-  };
-  window._ckeditorPatched = true;
-}
 
 const GrapesJsCustomPlugin: grapesjs.Plugin<PluginOptions> = (
   editor,
@@ -65,31 +17,6 @@ const GrapesJsCustomPlugin: grapesjs.Plugin<PluginOptions> = (
   console.log('Run GrapesJsCustomPlugin (SOS Homophobie - Modular Edition)...', options);
 
   editor.on('load', () => {
-    
-    // Configurer le Color Picker natif de GrapesJS (barre de droite)
-    if (editor.Config) {
-      (editor.Config as any).colorPicker = {
-        ...((editor.Config as any).colorPicker || {}),
-        palette: [
-          ['#ea148c', '#00577b', '#ffcf1a', '#2e78cc', '#ffffff', '#000000']
-        ]
-      };
-    }
-
-    // Forcer la police Roboto dans le panneau Typographie de GrapesJS
-    const styleManager = editor.StyleManager;
-    const fontProperty = styleManager.getProperty('typography', 'font-family');
-    if (fontProperty) {
-      fontProperty.set('options', [
-        { value: 'Roboto, Arial, sans-serif', name: 'Roboto' }
-        // Exemple pour ajouter d'autres polices dans la barre latérale GrapesJS :
-        // { value: 'Montserrat, Arial, sans-serif', name: 'Montserrat' },
-        // { value: 'Open Sans, Arial, sans-serif', name: 'Open Sans' }
-      ]);
-      // Par défaut, sélectionner Roboto
-      fontProperty.set('value', 'Roboto, Arial, sans-serif');
-    }
-
     const blockManager = editor.BlockManager;
 
     const catMauticElements = { id: 'sos-mautic-elements', label: 'Mautic - Éléments', open: true, order: 4 };
@@ -136,20 +63,6 @@ const GrapesJsCustomPlugin: grapesjs.Plugin<PluginOptions> = (
       }
       .civicrm-token-item:hover {
         background: #ea148c;
-        color: #fff;
-      }
-      .smarty-snippet-item {
-        background: #fdfdfd;
-        border: 1px solid #ddd;
-        padding: 8px;
-        cursor: pointer;
-        color: #00577b;
-        font-family: monospace;
-        margin-bottom: 5px;
-        border-radius: 4px;
-      }
-      .smarty-snippet-item:hover {
-        background: #00577b;
         color: #fff;
       }
     `;
@@ -602,178 +515,48 @@ const GrapesJsCustomPlugin: grapesjs.Plugin<PluginOptions> = (
     });
 
     // ==========================================
-    // UI TOGGLE MODES
+    // CIVICRM TOKENS MODAL
     // ==========================================
-
-    editor.Commands.add('edit-smarty-code', {
-      run(editor, sender, opts: any = {}) {
-        const target = opts.target || editor.getSelected();
-        if (!target || target.get('type') !== 'smarty-code') return;
-        
-        const modal = editor.Modal;
-        modal.setTitle('Éditer le code Smarty');
-        
-        const content = document.createElement('div');
-        content.innerHTML = `
-          <textarea id="smarty-code-editor" style="width:100%; height:300px; font-family:monospace; padding:10px; border:1px solid #ccc; font-size:14px;">${target.get('smartyContent') || ''}</textarea>
-          <div style="margin-top:15px; text-align:right;">
-            <button id="smarty-code-save" style="padding:10px 20px; background:#ea148c; color:#fff; border:none; cursor:pointer; font-weight:bold; border-radius:4px;">Sauvegarder et Fermer</button>
-          </div>
-        `;
-        
-        const btn = content.querySelector('#smarty-code-save') as HTMLButtonElement;
-        const textarea = content.querySelector('#smarty-code-editor') as HTMLTextAreaElement;
-        
-        btn.onclick = () => {
-          target.set('smartyContent', textarea.value);
-          // On force la re-génération du HTML interne
-          target.components(textarea.value);
-          modal.close();
-        };
-        
-        modal.setContent(content);
-        modal.open();
-      }
-    });
-
-    editor.DomComponents.addType('smarty-code', {
-      isComponent: el => el.tagName === 'DIV' && el.classList.contains('smarty-raw-block'),
-      model: {
-        defaults: {
-          tagName: 'div',
-          droppable: false,
-          editable: false, // On désactive CKEditor
-          attributes: { class: 'smarty-raw-block' },
-          smartyContent: '{* Code Smarty ou HTML brut *}',
-          style: {
-            'padding': '15px',
-            'border': '2px dashed #ea148c',
-            'background-color': '#f9f9f9',
-            'font-family': 'monospace',
-            'white-space': 'pre-wrap',
-            'min-height': '50px'
-          }
-        },
-        init() {
-          // Add custom toolbar button
-          const toolbar = this.get('toolbar') || [];
-          const id = 'edit-smarty';
-          if (!toolbar.find((t: any) => t.id === id)) {
-            toolbar.unshift({
-              id,
-              command: 'edit-smarty-code',
-              label: '<i class="fa fa-code"></i> Éditer Smarty',
-            });
-            this.set('toolbar', toolbar);
-          }
-        }
-      }
-    });
-
-    blockManager.add('smarty-code-block', {
-      label: 'Bloc Smarty',
-      content: { 
-        type: 'smarty-code',
-        content: '{* Code Smarty ou HTML brut *}',
-        smartyContent: '{* Code Smarty ou HTML brut *}'
-      },
-      category: catMauticElements.id,
-      attributes: { class: 'fa fa-code' }
-    });
-
-    const updateCategories = (mode: 'mautic' | 'civicrm') => {
-      const container = editor.getContainer();
-      if (!container) return;
-      const categories = container.querySelectorAll('.gjs-block-category');
-      categories.forEach((cat: any) => {
-        const titleEl = cat.querySelector('.gjs-title');
-        if (!titleEl) return;
-        const title = titleEl.innerText || titleEl.textContent;
-        if (title.includes('CiviCRM')) {
-          cat.style.display = mode === 'mautic' ? 'none' : 'block';
-        } else if (title.includes('Mautic')) {
-          cat.style.display = mode === 'civicrm' ? 'none' : 'block';
-        }
-      });
-    };
-
-    editor.Commands.add('set-mode-mautic', {
-      run(editor, sender) {
-        if (sender) sender.set('active', true);
-        const btnCivi = editor.Panels.getButton('options', 'mode-civicrm-btn');
-        if (btnCivi) btnCivi.set('active', false);
-        updateCategories('mautic');
-      }
-    });
-
-    editor.Commands.add('set-mode-civicrm', {
-      run(editor, sender) {
-        if (sender) sender.set('active', true);
-        const btnMautic = editor.Panels.getButton('options', 'mode-mautic-btn');
-        if (btnMautic) btnMautic.set('active', false);
-        updateCategories('civicrm');
-      }
-    });
-
     editor.Panels.addButton('options', {
-      id: 'mode-mautic-btn',
-      className: 'fa fa-envelope',
-      command: 'set-mode-mautic',
-      attributes: { title: 'Mode Mautic (Blocs Mautic)' },
-      active: true,
+      id: 'civicrm-tokens-btn',
+      className: 'fa fa-address-book',
+      command: 'open-civicrm-tokens',
+      attributes: { title: 'Tokens CiviCRM' },
     });
 
-    editor.Panels.addButton('options', {
-      id: 'mode-civicrm-btn',
-      className: 'fa fa-address-card',
-      command: 'set-mode-civicrm',
-      attributes: { title: 'Mode CiviCRM (Blocs CiviCRM)' },
-    });
-
-    editor.Panels.addButton('options', {
-      id: 'smarty-snippets-btn',
-      className: 'fa fa-magic',
-      command: 'open-smarty-snippets',
-      attributes: { title: 'Assistant Smarty (Snippets)' },
-    });
-
-    // Initialize display after block rendering
-    setTimeout(() => {
-      editor.runCommand('set-mode-mautic');
-    }, 500);
-
-    editor.Commands.add('open-smarty-snippets', {
+    editor.Commands.add('open-civicrm-tokens', {
       run(editor, sender) {
         sender && sender.set('active', 0);
         const modal = editor.Modal;
-        modal.setTitle('Snippets Smarty 5');
+        modal.setTitle('Tokens CiviCRM');
         
-        const snippets = [
-            { label: 'Condition (Si / Sinon)', code: '{if $condition}\\n    {* Code si vrai *}\\n{else}\\n    {* Code si faux *}\\n{/if}' },
-            { label: 'Vérifier si un contact a un prénom', code: '{if $contact.first_name}\\n    Bonjour {$contact.first_name},\\n{else}\\n    Bonjour,\\n{/if}' },
-            { label: 'Boucle (Foreach)', code: '{foreach $array as $item}\\n    {$item.name}\\n{/foreach}' },
-            { label: 'Assigner une variable', code: '{assign var="ma_variable" value="Mon Texte"}' },
-            { label: 'Capture de bloc', code: '{capture assign="mon_bloc"}\\n    <div>Contenu HTML capturé</div>\\n{/capture}' },
-            { label: 'Modificateur (Par défaut)', code: '{$contact.first_name|default:"Ami"}' },
-            { label: 'Modificateur (Majuscule)', code: '{$contact.last_name|upper}' },
-        ];
-
-        let html = '<p>Cliquez sur un bout de code (snippet) pour le copier, puis collez-le dans votre texte.</p>';
-        html += '<div class="civicrm-token-list">';
-        snippets.forEach((s) => {
-          const escCode = s.code.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-          const dispCode = s.code.replace(/\\n/g, '<br/>').replace(/ /g, '&nbsp;');
-          html += `<div class="smarty-snippet-item" title="Copier" onclick="navigator.clipboard.writeText('${escCode}'); alert('Snippet copié !');">
-            <strong>${s.label}</strong><br/>
-            <small style="color:#666">${dispCode}</small>
-          </div>`;
-        });
-        html += '</div>';
-
         const content = document.createElement('div');
-        content.innerHTML = html;
+        content.innerHTML = '<p>Chargement des tokens depuis CiviCRM...</p>';
         modal.setContent(content);
         modal.open();
+
+        fetch('/s/grapesjs-custom/civicrm/tokens')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.data && data.data.values) {
+              const tokens = data.data.values;
+              let html = '<p>Cliquez sur un token pour le copier dans le presse-papier, puis collez-le dans votre texte.</p>';
+              html += '<div class="civicrm-token-list">';
+              tokens.forEach((t: any) => {
+                const tokenStr = '{' + t.name + '}';
+                const label = t.label || t.title || t.name;
+                html += `<div class="civicrm-token-item" title="Copier" onclick="navigator.clipboard.writeText('${tokenStr}'); alert('Copié : ${tokenStr}');"><strong>${label}</strong> : ${tokenStr}</div>`;
+              });
+              html += '</div>';
+              content.innerHTML = html;
+            } else {
+              content.innerHTML = '<p style="color:red">Erreur lors du chargement des tokens. Vérifiez la clé API dans Mautic.</p>';
+            }
+          })
+          .catch(err => {
+            content.innerHTML = '<p style="color:red">Erreur réseau : impossible de joindre l&apos;API CiviCRM Mautic Proxy.</p>';
+            console.error(err);
+          });
       }
     });
 

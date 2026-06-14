@@ -1,8 +1,8 @@
 {
-  "name": "civicrm-builder-plugin",
+  "name": "jonathandhn/civicrm-builder-bundle",
   "version": "1.0.58",
-  "description": "Custom GrapesJS plugin for testing the plugin installation hook in Mautic's GrapesJS",
-  "license": "MIT",
+  "description": "CiviCRM Builder integration for Mautic",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "build": "grapesjs-cli build",
     "start": "grapesjs-cli serve"

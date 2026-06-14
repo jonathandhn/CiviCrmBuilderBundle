@@ -184,29 +184,46 @@
     const domComponents = editor.DomComponents;
     const commands = editor.Commands;
     domComponents.addType("smarty-code", {
-      isComponent: (el) => el.tagName === "SMARTY-CODE",
+      isComponent: (el) => {
+        const className = el.getAttribute ? el.getAttribute("class") || "" : "";
+        if (el.tagName === "SMARTY-CODE" || className.includes("smarty-code-wrapper")) {
+          return {
+            type: "smarty-code",
+            smartyContent: el.innerHTML
+          };
+        }
+      },
       model: {
         defaults: {
-          tagName: "div",
+          tagName: "mj-text",
           attributes: { class: "smarty-code-wrapper" },
           components: "",
-          smartyContent: "{* Ins\xE9rez votre code Smarty ici *}",
+          smartyContent: "{if $contact.first_name}Bonjour {$contact.first_name},{else}Bonjour,{/if}",
           traits: [
             {
               type: "text",
               name: "smartyContent",
               label: "Code Smarty"
             }
-          ],
-          style: {
-            padding: "10px",
-            border: "1px dashed #ea148c",
-            "background-color": "#f9f9f9",
-            color: "#ea148c",
-            "font-family": "monospace"
-          }
+          ]
         },
         init() {
+          const doc = editor.Canvas.getDocument();
+          if (doc && !doc.getElementById("smarty-editor-style")) {
+            const style = doc.createElement("style");
+            style.id = "smarty-editor-style";
+            style.innerHTML = `
+                        .smarty-code-wrapper {
+                            background-color: #ffe6f3 !important;
+                            padding: 20px !important;
+                            color: #ea148c !important;
+                            font-family: monospace !important;
+                            font-weight: bold !important;
+                            border: 1px dashed #ea148c !important;
+                        }
+                    `;
+            doc.head.appendChild(style);
+          }
           this.on("change:smartyContent", this.handleSmartyChange);
           this.handleSmartyChange();
         },
@@ -245,11 +262,27 @@
         const textarea = document.createElement("textarea");
         textarea.style.width = "100%";
         textarea.style.height = "200px";
+        textarea.style.padding = "15px";
+        textarea.style.color = "#333333";
+        textarea.style.backgroundColor = "#ffffff";
+        textarea.style.fontFamily = "monospace";
+        textarea.style.fontSize = "14px";
+        textarea.style.border = "1px solid #cccccc";
+        textarea.style.borderRadius = "4px";
+        textarea.style.boxSizing = "border-box";
         textarea.value = currentContent;
         const saveBtn = document.createElement("button");
-        saveBtn.innerHTML = "Sauvegarder";
-        saveBtn.style.marginTop = "10px";
-        saveBtn.className = "gjs-btn-prim";
+        saveBtn.innerHTML = "Sauvegarder le code";
+        saveBtn.style.marginTop = "15px";
+        saveBtn.style.backgroundColor = "#ea148c";
+        saveBtn.style.color = "#ffffff";
+        saveBtn.style.border = "none";
+        saveBtn.style.padding = "10px 20px";
+        saveBtn.style.borderRadius = "4px";
+        saveBtn.style.cursor = "pointer";
+        saveBtn.style.fontWeight = "bold";
+        saveBtn.style.fontSize = "14px";
+        saveBtn.style.float = "right";
         saveBtn.onclick = () => {
           target.set("smartyContent", textarea.value);
           editor2.Modal.close();

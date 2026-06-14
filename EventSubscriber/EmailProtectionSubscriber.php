@@ -58,7 +58,7 @@ class EmailProtectionSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $settings = unserialize($settingsStr);
+        $settings = unserialize($settingsStr, ['allowed_classes' => false]);
         if (!is_array($settings) || !isset($settings['integration']['email_mappings'])) {
             return;
         }

@@ -12,15 +12,7 @@ class CiviCrmController extends CommonController
 {
     public function tokensAction(): JsonResponse
     {
-        $db = $this->doctrine->getConnection();
-        $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
-        $settings = $settingsStr ? unserialize($settingsStr) : [];
-        if (!is_array($settings)) {
-            $settings = [];
-        }
-        if (!isset($settings['integration']) || !is_array($settings['integration'])) {
-            $settings['integration'] = [];
-        }
+        $settings = $this->loadPluginSettings();
         
         $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
         $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
@@ -51,11 +43,7 @@ class CiviCrmController extends CommonController
         curl_close($ch);
 
         if (!is_string($response)) {
-            file_put_contents(
-                '/home/maut/public_html/var/logs/civi_push_error.log',
-                date('Y-m-d H:i:s') . " - Tokens curl failed - HTTP: $httpCode - cURL: $curlErrNo - Error: $curlError\n",
-                FILE_APPEND
-            );
+            $this->logCiviCrmError("Tokens curl failed - HTTP: $httpCode - cURL: $curlErrNo - Error: $curlError");
             return new JsonResponse(['success' => false, 'error' => 'Erreur de connexion à CiviCRM'], 500);
         }
 
@@ -110,15 +98,7 @@ class CiviCrmController extends CommonController
             return $this->redirect($this->generateUrl('mautic_email_index'));
         }
 
-        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
-        $settings = $settingsStr ? unserialize($settingsStr) : [];
-        if (!is_array($settings)) {
-            $settings = [];
-        }
-        if (!isset($settings['integration']) || !is_array($settings['integration'])) {
-            $settings['integration'] = [];
-        }
-
+        $settings = $this->loadPluginSettings();
 
         $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
         $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
@@ -152,11 +132,7 @@ class CiviCrmController extends CommonController
             curl_close($chGet);
 
             if (!is_string($responseGet)) {
-                file_put_contents(
-                    '/home/maut/public_html/var/logs/civi_push_error.log',
-                    date('Y-m-d H:i:s') . " - Mailing GET curl failed - HTTP: $httpCodeGet - cURL: $curlErrNoGet - Error: $curlErrorGet\n",
-                    FILE_APPEND
-                );
+                $this->logCiviCrmError("Mailing GET curl failed - HTTP: $httpCodeGet - cURL: $curlErrNoGet - Error: $curlErrorGet");
             } else if ($httpCodeGet >= 200 && $httpCodeGet < 300) {
                 $dataGet = json_decode($responseGet, true);
                 if (!empty($dataGet['values'][0]) && $dataGet['values'][0]['status'] === 'Draft') {
@@ -215,11 +191,7 @@ class CiviCrmController extends CommonController
         curl_close($ch);
 
         if (!is_string($response)) {
-            file_put_contents(
-                '/home/maut/public_html/var/logs/civi_push_error.log',
-                date('Y-m-d H:i:s') . " - Mailing curl failed - HTTP: $httpCode - cURL: $curlErrNo - Error: $curlError\n",
-                FILE_APPEND
-            );
+            $this->logCiviCrmError("Mailing curl failed - HTTP: $httpCode - cURL: $curlErrNo - Error: $curlError");
             $this->addFlashMessage('Erreur cURL lors de l\'appel CiviCRM : ' . $curlError, [], 'error');
             return $this->redirect($this->generateUrl('mautic_email_action', ['objectAction' => 'view', 'objectId' => $objectId]));
         }
@@ -238,7 +210,7 @@ class CiviCrmController extends CommonController
         } else {
             $errorMessage = $data['error_message'] ?? 'Erreur inconnue';
             $this->addFlashMessage('Erreur lors de l\'action dans CiviCRM : ' . $errorMessage, [], 'error');
-            file_put_contents('/home/maut/public_html/var/logs/civi_push_error.log', date('Y-m-d H:i:s') . " - HTTP: $httpCode - Response: $response\n", FILE_APPEND);
+            $this->logCiviCrmError("Mailing API failed - HTTP: $httpCode - Response: $response");
         }
 
         return $this->redirect($this->generateUrl('mautic_email_action', ['objectAction' => 'view', 'objectId' => $objectId]));
@@ -256,15 +228,7 @@ class CiviCrmController extends CommonController
             return $this->redirect($this->generateUrl('mautic_email_index'));
         }
 
-        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
-        $settings = $settingsStr ? unserialize($settingsStr) : [];
-        if (!is_array($settings)) {
-            $settings = [];
-        }
-        if (!isset($settings['integration']) || !is_array($settings['integration'])) {
-            $settings['integration'] = [];
-        }
-
+        $settings = $this->loadPluginSettings();
 
         $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
         $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
@@ -298,11 +262,7 @@ class CiviCrmController extends CommonController
             curl_close($chGet);
 
             if (!is_string($responseGet)) {
-                file_put_contents(
-                    '/home/maut/public_html/var/logs/civi_push_error.log',
-                    date('Y-m-d H:i:s') . " - MessageTemplate GET curl failed - HTTP: $httpCodeGet - cURL: $curlErrNoGet - Error: $curlErrorGet\n",
-                    FILE_APPEND
-                );
+                $this->logCiviCrmError("MessageTemplate GET curl failed - HTTP: $httpCodeGet - cURL: $curlErrNoGet - Error: $curlErrorGet");
             } else if ($httpCodeGet >= 200 && $httpCodeGet < 300) {
                 $dataGet = json_decode($responseGet, true);
                 if (!empty($dataGet['values'][0])) {
@@ -357,11 +317,7 @@ class CiviCrmController extends CommonController
         curl_close($ch);
 
         if (!is_string($response)) {
-            file_put_contents(
-                '/home/maut/public_html/var/logs/civi_push_error.log',
-                date('Y-m-d H:i:s') . " - MessageTemplate curl failed - HTTP: $httpCode - cURL: $curlErrNo - Error: $curlError\n",
-                FILE_APPEND
-            );
+            $this->logCiviCrmError("MessageTemplate curl failed - HTTP: $httpCode - cURL: $curlErrNo - Error: $curlError");
             $this->addFlashMessage('Erreur cURL lors de l\'appel CiviCRM : ' . $curlError, [], 'error');
             return $this->redirect($this->generateUrl('mautic_email_action', ['objectAction' => 'view', 'objectId' => $objectId]));
         }
@@ -381,7 +337,7 @@ class CiviCrmController extends CommonController
         } else {
             $errorMessage = $data['error_message'] ?? 'Erreur inconnue';
             $this->addFlashMessage('Erreur lors de l\'action sur le modèle CiviCRM : ' . $errorMessage, [], 'error');
-            file_put_contents('/home/maut/public_html/var/logs/civi_push_error.log', date('Y-m-d H:i:s') . " - HTTP: $httpCode - Response: $response\n", FILE_APPEND);
+            $this->logCiviCrmError("MessageTemplate API failed - HTTP: $httpCode - Response: $response");
         }
 
         return $this->redirect($this->generateUrl('mautic_email_action', ['objectAction' => 'view', 'objectId' => $objectId]));
@@ -412,8 +368,7 @@ class CiviCrmController extends CommonController
             return new JsonResponse(['success' => true, 'data' => []]);
         }
 
-        $settingsStr = $this->doctrine->getConnection()->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
-        $settings = $settingsStr ? unserialize($settingsStr) : [];
+        $settings = $this->loadPluginSettings();
         $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
         $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
 
@@ -467,9 +422,7 @@ class CiviCrmController extends CommonController
 
         try {
             $db = $this->doctrine->getConnection();
-            $settingsStr = $db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
-            $settings = $settingsStr ? unserialize($settingsStr) : [];
-            if (!is_array($settings)) $settings = [];
+            $settings = $this->loadPluginSettings();
 
             if (!isset($settings['integration']['template_mappings'])) {
                 $settings['integration']['template_mappings'] = [];
@@ -613,5 +566,35 @@ class CiviCrmController extends CommonController
             'success' => true,
             'block' => $block
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function loadPluginSettings(): array
+    {
+        $settingsStr = $this->doctrine->getConnection()->fetchOne(
+            "SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'"
+        );
+
+        if (!is_string($settingsStr) || $settingsStr === '') {
+            return ['integration' => []];
+        }
+
+        $settings = unserialize($settingsStr, ['allowed_classes' => false]);
+        if (!is_array($settings)) {
+            $settings = [];
+        }
+
+        if (!isset($settings['integration']) || !is_array($settings['integration'])) {
+            $settings['integration'] = [];
+        }
+
+        return $settings;
+    }
+
+    private function logCiviCrmError(string $message): void
+    {
+        error_log('[CiviCrmBuilder] ' . $message);
     }
 }

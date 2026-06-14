@@ -3,8 +3,8 @@
 return [
     'name' => 'CiviCRM Builder',
     'description' => 'Intégration CiviCRM Builder pour Mautic',
-    'version' => '1.0.8',
-    'author' => 'Leuchtfeuer',
+    'version' => '1.0.58',
+    'author' => 'Jonathan DAHAN <jonathan@dhn.one>',
     'routes' => [
         'main' => [
             'civicrm_builder_civicrm_tokens' => [
@@ -44,6 +44,13 @@ return [
     'services' => [
         'other' => [],
         'events' => [
+            'mautic.civicrmbuilder.subscriber.assets' => [
+                'class' => \MauticPlugin\CiviCrmBuilderBundle\EventSubscriber\AssetsSubscriber::class,
+                'arguments' => [
+                    'civicrmbuilder.integration.config',
+                    'mautic.install.service',
+                ],
+            ],
             'mautic.civicrmbuilder.subscriber.civicrm_tokens' => [
                 'class' => \MauticPlugin\CiviCrmBuilderBundle\EventSubscriber\CiviCrmTokenSubscriber::class,
                 'arguments' => [
@@ -70,7 +77,14 @@ return [
                 'class' => \MauticPlugin\CiviCrmBuilderBundle\Form\Type\CiviCrmAuthType::class,
             ],
         ],
-        'models' => [],
+        'models' => [
+            'civicrmbuilder.integration.config' => [
+                'class' => \MauticPlugin\CiviCrmBuilderBundle\Integration\Config::class,
+                'arguments' => [
+                    'mautic.helper.integration',
+                ],
+            ],
+        ],
         'fixtures' => [],
         'integrations' => [
             'mautic.integration.civicrmbuilder' => [

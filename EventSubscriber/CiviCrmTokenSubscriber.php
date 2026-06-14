@@ -97,7 +97,13 @@ class CiviCrmTokenSubscriber implements EventSubscriberInterface
     private function fetchContactTokens(): array
     {
         $settingsStr = $this->db->fetchOne("SELECT feature_settings FROM plugin_integration_settings WHERE name = 'CiviCrmBuilder'");
-        $settings = $settingsStr ? unserialize($settingsStr) : [];
+        $settings = is_string($settingsStr) && $settingsStr !== ''
+            ? unserialize($settingsStr, ['allowed_classes' => false])
+            : [];
+        if (!is_array($settings)) {
+            $settings = [];
+        }
+
         $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
         $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
 

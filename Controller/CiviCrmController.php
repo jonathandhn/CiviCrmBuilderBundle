@@ -407,7 +407,7 @@ class CiviCrmController extends CommonController
             return new JsonResponse(['error' => 'Accès refusé'], 403);
         }
 
-        $query = trim($request->query->get('q', ''));
+        $query = trim($request->request->get('query', $request->query->get('q', '')));
         if (empty($query)) {
             return new JsonResponse(['success' => true, 'data' => []]);
         }
@@ -459,7 +459,7 @@ class CiviCrmController extends CommonController
             return new JsonResponse(['success' => false, 'message' => 'Accès refusé'], 403);
         }
 
-        $civiTemplateId = (int)$request->request->get('civi_template_id');
+        $civiTemplateId = (int)$request->request->get('civicrm_template_id');
 
         if (!$civiTemplateId) {
             return new JsonResponse(['success' => false, 'error' => 'ID invalide.']);
@@ -471,11 +471,11 @@ class CiviCrmController extends CommonController
             $settings = $settingsStr ? unserialize($settingsStr) : [];
             if (!is_array($settings)) $settings = [];
 
-            if (!isset($settings['integration']['email_mappings'])) {
-                $settings['integration']['email_mappings'] = [];
+            if (!isset($settings['integration']['template_mappings'])) {
+                $settings['integration']['template_mappings'] = [];
             }
 
-            $settings['integration']['email_mappings'][$objectId] = $civiTemplateId;
+            $settings['integration']['template_mappings'][$objectId] = $civiTemplateId;
 
             $db->executeStatement(
                 "UPDATE plugin_integration_settings SET feature_settings = :settings WHERE name = 'CiviCrmBuilder'",

@@ -1,3 +1,8 @@
+const t = (key: string, fallback: string): string => {
+    const translated = (window as any).Mautic?.translate?.(key);
+    return translated && translated !== key ? translated : fallback;
+};
+
 export function registerSmartyBlock(editor: any, catCiviElementsId: string) {
     const blockManager = editor.BlockManager;
     const domComponents = editor.DomComponents;
@@ -24,7 +29,7 @@ export function registerSmartyBlock(editor: any, catCiviElementsId: string) {
                     {
                         type: 'text',
                         name: 'smartyContent',
-                        label: 'Code Smarty',
+                        label: t('civicrmbuilder.smarty.code_label', 'Smarty code'),
                     }
                 ]
             },
@@ -61,7 +66,7 @@ export function registerSmartyBlock(editor: any, catCiviElementsId: string) {
             onRender() {
                 // Bouton d'édition rapide (optionnel)
                 const btn = document.createElement('button');
-                btn.innerHTML = 'Éditer Smarty';
+                btn.innerHTML = t('civicrmbuilder.smarty.edit_button', 'Edit Smarty');
                 btn.style.position = 'absolute';
                 btn.style.top = '0';
                 btn.style.right = '0';
@@ -104,7 +109,7 @@ export function registerSmartyBlock(editor: any, catCiviElementsId: string) {
             textarea.value = currentContent;
 
             const saveBtn = document.createElement('button');
-            saveBtn.innerHTML = 'Sauvegarder le code';
+            saveBtn.innerHTML = t('civicrmbuilder.smarty.save_code', 'Save code');
             saveBtn.style.marginTop = '15px';
             saveBtn.style.backgroundColor = '#ea148c';
             saveBtn.style.color = '#ffffff';
@@ -123,7 +128,7 @@ export function registerSmartyBlock(editor: any, catCiviElementsId: string) {
             modalContent.appendChild(textarea);
             modalContent.appendChild(saveBtn);
 
-            editor.Modal.setTitle('Éditer le code Smarty')
+            editor.Modal.setTitle(t('civicrmbuilder.smarty.modal_title', 'Edit Smarty code'))
                 .setContent(modalContent)
                 .open();
         }
@@ -131,7 +136,7 @@ export function registerSmartyBlock(editor: any, catCiviElementsId: string) {
 
     // Ajout du bloc dans le gestionnaire de blocs, catégorie CiviCRM - Logique
     blockManager.add('smarty-code-block', {
-        label: 'Smarty Code',
+        label: t('civicrmbuilder.smarty.block_label', 'Smarty code'),
         category: catCiviElementsId,
         attributes: { class: 'fa fa-code' },
         content: { type: 'smarty-code' }

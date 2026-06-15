@@ -6,10 +6,10 @@ namespace MauticPlugin\CiviCrmBuilderBundle\EventSubscriber;
 
 use Mautic\CoreBundle\CoreEvents;
 use Mautic\CoreBundle\Event\CustomButtonEvent;
+use Mautic\CoreBundle\Security\Permissions\CorePermissions;
 use Mautic\CoreBundle\Twig\Helper\ButtonHelper;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Mautic\CoreBundle\Security\Permissions\CorePermissions;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ButtonSubscriber implements EventSubscriberInterface
@@ -78,7 +78,7 @@ class ButtonSubscriber implements EventSubscriberInterface
 
         if ($this->security->isGranted('civicrmbuilder:civicrm:link_template')) {
             $linkRoute = $this->router->generate('civicrm_builder_civicrm_link_modal', ['objectId' => $email->getId()]);
-            
+
             $event->addButton(
                 [
                     'attr'      => [

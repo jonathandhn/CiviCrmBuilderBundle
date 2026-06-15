@@ -4,6 +4,7 @@ civicrmbuilder.config.civicrm_url.required: "The CiviCRM URL is required"
 
 civicrmbuilder.config.api_key.label: "API key (Bearer token)"
 civicrmbuilder.config.api_key.placeholder: "e.g. 8geCAfNp..."
+civicrmbuilder.config.api_key.help: "Leave this field empty to keep the current API key."
 civicrmbuilder.config.api_key.required: "The API key is required"
 
 civicrmbuilder.config.clear_mappings.label: "Clear draft link history"

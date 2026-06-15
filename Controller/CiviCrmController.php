@@ -13,27 +13,27 @@ class CiviCrmController extends CommonController
     public function tokensAction(): JsonResponse
     {
         $settings = $this->loadPluginSettings();
-        
+
         $apiKey = $settings['integration']['api_key'] ?? $settings['api_key'] ?? '';
         $civicrmUrl = $settings['integration']['civicrm_url'] ?? $settings['civicrm_url'] ?? '';
 
         if (empty($apiKey) || empty($civicrmUrl)) {
             return new JsonResponse(['success' => false, 'error' => 'Configuration CiviCRM absente.'], 400);
         }
-        
+
         // 1. Appel dynamique vers CiviCRM pour récupérer tous les champs (y compris custom) du Contact
         $apiUrl = rtrim($civicrmUrl, '/') . '/civicrm/ajax/api4/Contact/getFields';
-        
+
         $ch = curl_init($apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'X-Civi-Auth: Bearer ' . $apiKey,
-            'Content-Type: application/x-www-form-urlencoded'
+            'Content-Type: application/x-www-form-urlencoded',
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, 'params=' . urlencode(json_encode([
-            "select" => ["name", "title"],
-            "limit" => 500
+            'select' => ['name', 'title'],
+            'limit' => 500,
         ])));
 
         $response = curl_exec($ch);
@@ -55,7 +55,7 @@ class CiviCrmController extends CommonController
                 foreach ($data['values'] as $field) {
                     $tokens[] = [
                         'name' => 'contact.' . $field['name'],
-                        'label' => 'Contact : ' . $field['title']
+                        'label' => 'Contact : ' . $field['title'],
                     ];
                 }
             }
@@ -77,7 +77,7 @@ class CiviCrmController extends CommonController
         return new JsonResponse([
             'success' => true,
             'data' => ['values' => $tokens],
-            'api_status' => $httpCode
+            'api_status' => $httpCode,
         ]);
     }
 
@@ -89,7 +89,7 @@ class CiviCrmController extends CommonController
 
         /** @var \Mautic\EmailBundle\Model\EmailModel $model */
         $model = $this->getModel('email');
-        
+
         /** @var \Mautic\EmailBundle\Entity\Email|null $email */
         $email = $model->getEntity($objectId);
 
@@ -118,12 +118,12 @@ class CiviCrmController extends CommonController
             curl_setopt($chGet, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($chGet, CURLOPT_HTTPHEADER, [
                 'X-Civi-Auth: Bearer ' . $apiKey,
-                'Content-Type: application/x-www-form-urlencoded'
+                'Content-Type: application/x-www-form-urlencoded',
             ]);
             curl_setopt($chGet, CURLOPT_POST, true);
             curl_setopt($chGet, CURLOPT_POSTFIELDS, 'params=' . urlencode(json_encode([
                 'select' => ['id', 'status'],
-                'where' => [['id', '=', $civiMailingId]]
+                'where' => [['id', '=', $civiMailingId]],
             ])));
             $responseGet = curl_exec($chGet);
             $httpCodeGet = curl_getinfo($chGet, CURLINFO_HTTP_CODE);
@@ -133,7 +133,7 @@ class CiviCrmController extends CommonController
 
             if (!is_string($responseGet)) {
                 $this->logCiviCrmError("Mailing GET curl failed - HTTP: $httpCodeGet - cURL: $curlErrNoGet - Error: $curlErrorGet");
-            } else if ($httpCodeGet >= 200 && $httpCodeGet < 300) {
+            } elseif ($httpCodeGet >= 200 && $httpCodeGet < 300) {
                 $dataGet = json_decode($responseGet, true);
                 if (!empty($dataGet['values'][0]) && $dataGet['values'][0]['status'] === 'Draft') {
                     $isUpdate = true;
@@ -162,7 +162,7 @@ class CiviCrmController extends CommonController
                 'name' => $name,
                 'subject' => $subject,
                 'body_html' => $html,
-            ]
+            ],
         ];
 
         if ($isUpdate) {
@@ -179,7 +179,7 @@ class CiviCrmController extends CommonController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'X-Civi-Auth: Bearer ' . $apiKey,
-            'Content-Type: application/x-www-form-urlencoded'
+            'Content-Type: application/x-www-form-urlencoded',
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, 'params=' . urlencode(json_encode($civiParams)));
@@ -248,12 +248,12 @@ class CiviCrmController extends CommonController
             curl_setopt($chGet, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($chGet, CURLOPT_HTTPHEADER, [
                 'X-Civi-Auth: Bearer ' . $apiKey,
-                'Content-Type: application/x-www-form-urlencoded'
+                'Content-Type: application/x-www-form-urlencoded',
             ]);
             curl_setopt($chGet, CURLOPT_POST, true);
             curl_setopt($chGet, CURLOPT_POSTFIELDS, 'params=' . urlencode(json_encode([
                 'select' => ['id'],
-                'where' => [['id', '=', $civiTemplateId]]
+                'where' => [['id', '=', $civiTemplateId]],
             ])));
             $responseGet = curl_exec($chGet);
             $httpCodeGet = curl_getinfo($chGet, CURLINFO_HTTP_CODE);
@@ -263,7 +263,7 @@ class CiviCrmController extends CommonController
 
             if (!is_string($responseGet)) {
                 $this->logCiviCrmError("MessageTemplate GET curl failed - HTTP: $httpCodeGet - cURL: $curlErrNoGet - Error: $curlErrorGet");
-            } else if ($httpCodeGet >= 200 && $httpCodeGet < 300) {
+            } elseif ($httpCodeGet >= 200 && $httpCodeGet < 300) {
                 $dataGet = json_decode($responseGet, true);
                 if (!empty($dataGet['values'][0])) {
                     $isUpdate = true;
@@ -292,7 +292,7 @@ class CiviCrmController extends CommonController
                 'msg_title' => $name,
                 'msg_subject' => $subject,
                 'msg_html' => $html,
-            ]
+            ],
         ];
 
         if ($isUpdate) {
@@ -305,7 +305,7 @@ class CiviCrmController extends CommonController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'X-Civi-Auth: Bearer ' . $apiKey,
-            'Content-Type: application/x-www-form-urlencoded'
+            'Content-Type: application/x-www-form-urlencoded',
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, 'params=' . urlencode(json_encode($civiParams)));
@@ -385,13 +385,13 @@ class CiviCrmController extends CommonController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'X-Civi-Auth: Bearer ' . $apiKey,
-            'Content-Type: application/x-www-form-urlencoded'
+            'Content-Type: application/x-www-form-urlencoded',
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, 'params=' . urlencode(json_encode([
             'select' => ['id', 'msg_title'],
             'where' => $whereClause,
-            'limit' => 20
+            'limit' => 20,
         ])));
 
         $response = curl_exec($ch);
@@ -445,7 +445,7 @@ class CiviCrmController extends CommonController
     {
         // On sécurise le nom du thème (pas de ../ etc)
         $theme = basename($theme);
-        
+
         $projectDir = realpath(__DIR__ . '/../../../');
         $themeDir = $projectDir . '/themes/' . $theme;
         $blocksDir = $themeDir . '/blocks';
@@ -477,7 +477,7 @@ class CiviCrmController extends CommonController
 
             if ($ext === 'json') {
                 $content = file_get_contents($filePath);
-                
+
                 // Remplacement dynamique des variables (ex: {color_primary} -> #ea148c)
                 foreach ($variables as $key => $val) {
                     if (is_string($val)) {
@@ -494,7 +494,7 @@ class CiviCrmController extends CommonController
             } elseif ($ext === 'html' || $ext === 'twig') {
                 $id = pathinfo($filePath, PATHINFO_FILENAME);
                 $content = file_get_contents($filePath);
-                
+
                 foreach ($variables as $key => $val) {
                     if (is_string($val)) {
                         $content = str_replace('{' . $key . '}', $val, $content);
@@ -510,10 +510,10 @@ class CiviCrmController extends CommonController
             }
         }
 
-        error_log("[CiviCrmBuilder] Successfully loaded " . count($blocks) . " blocks for theme: {$theme}");
+        error_log('[CiviCrmBuilder] Successfully loaded ' . count($blocks) . " blocks for theme: {$theme}");
         return new JsonResponse([
             'blocks' => $blocks,
-            'theme_variables' => $variables
+            'theme_variables' => $variables,
         ]);
     }
 
@@ -545,12 +545,12 @@ class CiviCrmController extends CommonController
         }
 
         $id = isset($data['id']) && !empty($data['id']) ? preg_replace('/[^a-z0-9_-]/', '', strtolower($data['id'])) : 'custom-' . time();
-        
+
         $block = [
             'id' => $id,
             'label' => $data['label'],
             'category' => isset($data['category']) && !empty($data['category']) ? $data['category'] : 'Blocs Sauvegardés',
-            'content' => $data['content']
+            'content' => $data['content'],
         ];
 
         if (isset($data['media']) && !empty($data['media'])) {
@@ -564,7 +564,7 @@ class CiviCrmController extends CommonController
 
         return new JsonResponse([
             'success' => true,
-            'block' => $block
+            'block' => $block,
         ]);
     }
 

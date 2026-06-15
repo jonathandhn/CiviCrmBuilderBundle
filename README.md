@@ -62,6 +62,7 @@ Expected values:
 
 - `CiviCRM URL`: the root URL of your instance, for example `https://crm.example.org`
 - `API key (Bearer token)`: the API key expected by the `X-Civi-Auth: Bearer ...` header
+  (Must be enabled in CiviCRM: Administer > System Settings > Authentication)
 
 The form validates the connection to CiviCRM on save.
 
@@ -88,9 +89,12 @@ proto_mjml/
 │   └── img/
 ├── blocks/
 │   ├── proto-button.json
+│   ├── proto-domain-civicrm.json
 │   ├── proto-divider.json
 │   ├── proto-footer.json
+│   ├── proto-greeting-civicrm.json
 │   ├── proto-header.json
+│   ├── proto-links-civicrm.json
 │   ├── proto-section.json
 │   ├── proto-text.json
 │   ├── proto-title.json
@@ -117,6 +121,7 @@ proto_mjml/
 - `theme_variables.json` provides the dynamic variables replaced inside blocks.
 - `html/email.mjml.twig` is the base for newsletters/emails.
 - `blocks/` contains the custom blocks loaded by the bundle.
+- some bundled blocks demonstrate CiviCRM tokens such as `{$contact.first_name}`, `{mailing.viewUrl}`, `{action.optOutUrl}`, `{domain.name}`, and `{domain.email}`.
 - `assets/` is free-form: images, fonts, icons, and so on.
 
 ## Build

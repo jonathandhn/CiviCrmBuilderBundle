@@ -2,17 +2,22 @@ import { getStaticBlocks } from './civicrmBlocks';
 import { registerSmartyBlock } from './smartyBlock';
 import { CustomBlock } from './customBlockLoader';
 
+const t = (key: string, fallback: string): string => {
+    const translated = (window as any).Mautic?.translate?.(key);
+    return translated && translated !== key ? translated : fallback;
+};
+
 export function registerBlocks(editor: any, customBlocks: CustomBlock[]) {
     const blockManager = editor.BlockManager;
 
     // Définition des catégories
     const categories = {
-        catMauticElements: blockManager.getCategories().add({ id: 'mautic-elements', label: 'Thème Mautic - Éléments', open: true }),
-        catMauticStructures: blockManager.getCategories().add({ id: 'mautic-structures', label: 'Thème Mautic - Structures', open: true }),
-        catCiviElements: blockManager.getCategories().add({ id: 'civicrm-elements', label: 'CiviCRM - Éléments', open: true }),
-        catCiviStructures: blockManager.getCategories().add({ id: 'civicrm-structures', label: 'CiviCRM - Structures', open: true }),
-        categoryElements: blockManager.getCategories().add({ id: 'custom-elements', label: 'Éléments', open: true }),
-        categoryStructures: blockManager.getCategories().add({ id: 'custom-structures', label: 'Structures', open: true }),
+        catMauticElements: blockManager.getCategories().add({ id: 'mautic-elements', label: t('civicrmbuilder.category.mautic_elements', 'Mautic theme - Elements'), open: true }),
+        catMauticStructures: blockManager.getCategories().add({ id: 'mautic-structures', label: t('civicrmbuilder.category.mautic_structures', 'Mautic theme - Structures'), open: true }),
+        catCiviElements: blockManager.getCategories().add({ id: 'civicrm-elements', label: t('civicrmbuilder.category.civicrm_elements', 'CiviCRM - Elements'), open: true }),
+        catCiviStructures: blockManager.getCategories().add({ id: 'civicrm-structures', label: t('civicrmbuilder.category.civicrm_structures', 'CiviCRM - Structures'), open: true }),
+        categoryElements: blockManager.getCategories().add({ id: 'custom-elements', label: t('civicrmbuilder.category.elements', 'Elements'), open: true }),
+        categoryStructures: blockManager.getCategories().add({ id: 'custom-structures', label: t('civicrmbuilder.category.structures', 'Structures'), open: true }),
     };
 
     // 1. Enregistrement du composant GrapesJS Smarty

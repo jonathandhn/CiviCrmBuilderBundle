@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MauticPlugin\CiviCrmBuilderBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -18,6 +18,9 @@ class CiviCrmAuthType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $existingData = $builder->getData();
+        $existingApiKey = is_array($existingData) ? (string) ($existingData['api_key'] ?? '') : '';
+
         $builder->add('civicrm_url', UrlType::class, [
             'label' => 'civicrmbuilder.config.civicrm_url.label',
             'required' => true,
@@ -30,17 +33,31 @@ class CiviCrmAuthType extends AbstractType
             ],
         ]);
 
-        $builder->add('api_key', TextType::class, [
+        $builder->add('api_key', PasswordType::class, [
             'label' => 'civicrmbuilder.config.api_key.label',
             'required' => true,
+            'empty_data' => '',
             'attr' => [
                 'class' => 'form-control',
                 'placeholder' => 'civicrmbuilder.config.api_key.placeholder',
             ],
+            'help' => 'civicrmbuilder.config.api_key.help',
             'constraints' => [
                 new NotBlank(['message' => 'civicrmbuilder.config.api_key.required']),
             ],
         ]);
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, static function (FormEvent $event) use ($existingApiKey): void {
+            $data = $event->getData();
+            if (!is_array($data)) {
+                return;
+            }
+
+            if (($data['api_key'] ?? '') === '' && $existingApiKey !== '') {
+                $data['api_key'] = $existingApiKey;
+                $event->setData($data);
+            }
+        });
 
         $builder->add('clear_mappings', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
             'label' => 'civicrmbuilder.config.clear_mappings.label',

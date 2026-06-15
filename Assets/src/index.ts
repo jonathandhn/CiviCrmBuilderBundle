@@ -11,6 +11,11 @@ declare global {
   }
 }
 
+const t = (key: string, fallback: string): string => {
+  const translated = window.Mautic?.translate?.(key);
+  return translated && translated !== key ? translated : fallback;
+};
+
 const CiviCrmBuilder = (editor: any, options: any) => {
   console.info('[CiviCrmBuilder] Plugin is booting...');
 
@@ -76,14 +81,14 @@ const CiviCrmBuilder = (editor: any, options: any) => {
       id: 'btn-mode-mautic',
       className: 'fa fa-envelope',
       command: 'set-mode-mautic',
-      attributes: { title: 'Mode Mautic' },
+      attributes: { title: t('civicrmbuilder.mode.mautic', 'Mautic mode') },
       active: true,
     });
     panels.addButton('options', {
       id: 'btn-mode-civicrm',
       className: 'fa fa-users',
       command: 'set-mode-civicrm',
-      attributes: { title: 'Mode CiviCRM' },
+      attributes: { title: t('civicrmbuilder.mode.civicrm', 'CiviCRM mode') },
       active: false,
     });
 
@@ -141,7 +146,7 @@ const CiviCrmBuilder = (editor: any, options: any) => {
         if (!hasSave) {
           tb.unshift({
             id: 'save-block',
-            attributes: { class: 'fa fa-floppy-o', title: 'Sauvegarder ce bloc' },
+            attributes: { class: 'fa fa-floppy-o', title: t('civicrmbuilder.toolbar.save_block', 'Save this block') },
             command: 'save-block-cmd',
           });
           model.set('toolbar', tb);
@@ -153,7 +158,10 @@ const CiviCrmBuilder = (editor: any, options: any) => {
           const selected = editor.getSelected();
           if (!selected) return;
 
-          const blockName = prompt("Nom du nouveau bloc ?", "Mon Bloc Personnalisé");
+          const blockName = prompt(
+            t('civicrmbuilder.prompt.save_block', 'Name your new block'),
+            t('civicrmbuilder.prompt.save_block.default', 'My Custom Block')
+          );
           if (!blockName) return;
 
           // Extraire le HTML / MJML
@@ -161,7 +169,7 @@ const CiviCrmBuilder = (editor: any, options: any) => {
           const tName = resolveTheme();
 
           if (!tName) {
-            alert("Erreur : Aucun thème actif détecté.");
+            alert(t('civicrmbuilder.alert.no_active_theme', 'Error: no active theme detected.'));
             return;
           }
 
@@ -177,14 +185,17 @@ const CiviCrmBuilder = (editor: any, options: any) => {
             })
           }).then(res => res.json()).then(data => {
             if (data.success) {
-              alert("Bloc sauvegardé avec succès dans le thème " + tName + " ! Rafraîchissez la page pour le voir dans la section 'Blocs Sauvegardés'.");
+              alert(
+                t('civicrmbuilder.alert.save_block_success', 'Block saved successfully in theme %theme%! Refresh the page to see it in Saved Blocks.')
+                  .replace('%theme%', tName)
+              );
             } else {
               const errMsg = data.error || (data.errors && data.errors[0] ? data.errors[0].message : JSON.stringify(data));
-              alert("Erreur serveur : " + errMsg);
+              alert(`${t('civicrmbuilder.alert.server_error', 'Server error:')} ${errMsg}`);
             }
           }).catch(err => {
             console.error(err);
-            alert("Erreur réseau lors de la sauvegarde du bloc.");
+            alert(t('civicrmbuilder.alert.network_error', 'Network error while saving the block.'));
           });
         }
       });

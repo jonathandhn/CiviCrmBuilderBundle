@@ -4,6 +4,7 @@ civicrmbuilder.config.civicrm_url.required: "L'URL CiviCRM est requise"
 
 civicrmbuilder.config.api_key.label: "Cle API (Bearer Token)"
 civicrmbuilder.config.api_key.placeholder: "ex: 8geCAfNp..."
+civicrmbuilder.config.api_key.help: "Laissez ce champ vide pour conserver la cle API actuelle."
 civicrmbuilder.config.api_key.required: "La cle API est requise"
 
 civicrmbuilder.config.clear_mappings.label: "Vider l'historique des liaisons de brouillons"

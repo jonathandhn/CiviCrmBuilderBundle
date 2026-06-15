@@ -179,6 +179,11 @@
   }
 
   // Assets/src/smartyBlock.ts
+  var t = (key, fallback) => {
+    var _a, _b;
+    const translated = (_b = (_a = window.Mautic) == null ? void 0 : _a.translate) == null ? void 0 : _b.call(_a, key);
+    return translated && translated !== key ? translated : fallback;
+  };
   function registerSmartyBlock(editor, catCiviElementsId) {
     const blockManager = editor.BlockManager;
     const domComponents = editor.DomComponents;
@@ -203,7 +208,7 @@
             {
               type: "text",
               name: "smartyContent",
-              label: "Code Smarty"
+              label: t("civicrmbuilder.smarty.code_label", "Smarty code")
             }
           ]
         },
@@ -235,7 +240,7 @@
       view: {
         onRender() {
           const btn = document.createElement("button");
-          btn.innerHTML = "\xC9diter Smarty";
+          btn.innerHTML = t("civicrmbuilder.smarty.edit_button", "Edit Smarty");
           btn.style.position = "absolute";
           btn.style.top = "0";
           btn.style.right = "0";
@@ -272,7 +277,7 @@
         textarea.style.boxSizing = "border-box";
         textarea.value = currentContent;
         const saveBtn = document.createElement("button");
-        saveBtn.innerHTML = "Sauvegarder le code";
+        saveBtn.innerHTML = t("civicrmbuilder.smarty.save_code", "Save code");
         saveBtn.style.marginTop = "15px";
         saveBtn.style.backgroundColor = "#ea148c";
         saveBtn.style.color = "#ffffff";
@@ -289,11 +294,11 @@
         };
         modalContent.appendChild(textarea);
         modalContent.appendChild(saveBtn);
-        editor2.Modal.setTitle("\xC9diter le code Smarty").setContent(modalContent).open();
+        editor2.Modal.setTitle(t("civicrmbuilder.smarty.modal_title", "Edit Smarty code")).setContent(modalContent).open();
       }
     });
     blockManager.add("smarty-code-block", {
-      label: "Smarty Code",
+      label: t("civicrmbuilder.smarty.block_label", "Smarty code"),
       category: catCiviElementsId,
       attributes: { class: "fa fa-code" },
       content: { type: "smarty-code" }
@@ -301,15 +306,20 @@
   }
 
   // Assets/src/blockRegistry.ts
+  var t2 = (key, fallback) => {
+    var _a, _b;
+    const translated = (_b = (_a = window.Mautic) == null ? void 0 : _a.translate) == null ? void 0 : _b.call(_a, key);
+    return translated && translated !== key ? translated : fallback;
+  };
   function registerBlocks(editor, customBlocks) {
     const blockManager = editor.BlockManager;
     const categories = {
-      catMauticElements: blockManager.getCategories().add({ id: "mautic-elements", label: "Th\xE8me Mautic - \xC9l\xE9ments", open: true }),
-      catMauticStructures: blockManager.getCategories().add({ id: "mautic-structures", label: "Th\xE8me Mautic - Structures", open: true }),
-      catCiviElements: blockManager.getCategories().add({ id: "civicrm-elements", label: "CiviCRM - \xC9l\xE9ments", open: true }),
-      catCiviStructures: blockManager.getCategories().add({ id: "civicrm-structures", label: "CiviCRM - Structures", open: true }),
-      categoryElements: blockManager.getCategories().add({ id: "custom-elements", label: "\xC9l\xE9ments", open: true }),
-      categoryStructures: blockManager.getCategories().add({ id: "custom-structures", label: "Structures", open: true })
+      catMauticElements: blockManager.getCategories().add({ id: "mautic-elements", label: t2("civicrmbuilder.category.mautic_elements", "Mautic theme - Elements"), open: true }),
+      catMauticStructures: blockManager.getCategories().add({ id: "mautic-structures", label: t2("civicrmbuilder.category.mautic_structures", "Mautic theme - Structures"), open: true }),
+      catCiviElements: blockManager.getCategories().add({ id: "civicrm-elements", label: t2("civicrmbuilder.category.civicrm_elements", "CiviCRM - Elements"), open: true }),
+      catCiviStructures: blockManager.getCategories().add({ id: "civicrm-structures", label: t2("civicrmbuilder.category.civicrm_structures", "CiviCRM - Structures"), open: true }),
+      categoryElements: blockManager.getCategories().add({ id: "custom-elements", label: t2("civicrmbuilder.category.elements", "Elements"), open: true }),
+      categoryStructures: blockManager.getCategories().add({ id: "custom-structures", label: t2("civicrmbuilder.category.structures", "Structures"), open: true })
     };
     registerSmartyBlock(editor, categories.catCiviElements.id);
     const staticBlocks = getStaticBlocks(categories);
@@ -349,6 +359,11 @@
   }
 
   // Assets/src/index.ts
+  var t3 = (key, fallback) => {
+    var _a, _b;
+    const translated = (_b = (_a = window.Mautic) == null ? void 0 : _a.translate) == null ? void 0 : _b.call(_a, key);
+    return translated && translated !== key ? translated : fallback;
+  };
   var CiviCrmBuilder = (editor, options) => {
     console.info("[CiviCrmBuilder] Plugin is booting...");
     editor.on("load", () => {
@@ -391,14 +406,14 @@
         id: "btn-mode-mautic",
         className: "fa fa-envelope",
         command: "set-mode-mautic",
-        attributes: { title: "Mode Mautic" },
+        attributes: { title: t3("civicrmbuilder.mode.mautic", "Mautic mode") },
         active: true
       });
       panels.addButton("options", {
         id: "btn-mode-civicrm",
         className: "fa fa-users",
         command: "set-mode-civicrm",
-        attributes: { title: "Mode CiviCRM" },
+        attributes: { title: t3("civicrmbuilder.mode.civicrm", "CiviCRM mode") },
         active: false
       });
       setTimeout(() => {
@@ -438,7 +453,7 @@
           if (!hasSave) {
             tb.unshift({
               id: "save-block",
-              attributes: { class: "fa fa-floppy-o", title: "Sauvegarder ce bloc" },
+              attributes: { class: "fa fa-floppy-o", title: t3("civicrmbuilder.toolbar.save_block", "Save this block") },
               command: "save-block-cmd"
             });
             model.set("toolbar", tb);
@@ -448,12 +463,15 @@
           run(editor2, sender, opts) {
             const selected = editor2.getSelected();
             if (!selected) return;
-            const blockName = prompt("Nom du nouveau bloc ?", "Mon Bloc Personnalis\xE9");
+            const blockName = prompt(
+              t3("civicrmbuilder.prompt.save_block", "Name your new block"),
+              t3("civicrmbuilder.prompt.save_block.default", "My Custom Block")
+            );
             if (!blockName) return;
             const content = selected.toHTML();
             const tName = resolveTheme();
             if (!tName) {
-              alert("Erreur : Aucun th\xE8me actif d\xE9tect\xE9.");
+              alert(t3("civicrmbuilder.alert.no_active_theme", "Error: no active theme detected."));
               return;
             }
             fetch("/s/civicrm-builder/theme-blocks/" + tName + "/save", {
@@ -468,14 +486,16 @@
               })
             }).then((res) => res.json()).then((data) => {
               if (data.success) {
-                alert("Bloc sauvegard\xE9 avec succ\xE8s dans le th\xE8me " + tName + " ! Rafra\xEEchissez la page pour le voir dans la section 'Blocs Sauvegard\xE9s'.");
+                alert(
+                  t3("civicrmbuilder.alert.save_block_success", "Block saved successfully in theme %theme%! Refresh the page to see it in Saved Blocks.").replace("%theme%", tName)
+                );
               } else {
                 const errMsg = data.error || (data.errors && data.errors[0] ? data.errors[0].message : JSON.stringify(data));
-                alert("Erreur serveur : " + errMsg);
+                alert(`${t3("civicrmbuilder.alert.server_error", "Server error:")} ${errMsg}`);
               }
             }).catch((err) => {
               console.error(err);
-              alert("Erreur r\xE9seau lors de la sauvegarde du bloc.");
+              alert(t3("civicrmbuilder.alert.network_error", "Network error while saving the block."));
             });
           }
         });
@@ -498,3 +518,4 @@
     }
   });
 })();
+//# sourceMappingURL=index.js.map

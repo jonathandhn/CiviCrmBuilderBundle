@@ -64,7 +64,7 @@ class EmailProtectionSubscriber implements EventSubscriberInterface
         }
 
         $mappings = $settings['integration']['template_mappings'];
-        
+
         // Si l'ID de cet email se trouve dans les mappings
         if (isset($mappings[$email->getId()])) {
             throw new AccessDeniedException('Action bloquée : Vous n\'avez pas la permission de modifier ou de supprimer un e-mail utilisé comme modèle CiviCRM.');

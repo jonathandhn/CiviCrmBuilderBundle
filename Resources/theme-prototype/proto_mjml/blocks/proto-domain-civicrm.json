@@ -1,0 +1,6 @@
+{
+  "id": "proto-domain-civicrm",
+  "label": "Domain signature (CiviCRM)",
+  "category": "CiviCRM - Elements",
+  "content": "<mj-text align=\"center\" color=\"{color_muted}\" font-size=\"13px\" padding=\"0 24px\"><p><b>{domain.name}</b><br>{domain.address}<br><a href=\"mailto:{domain.email}\">{domain.email}</a></p></mj-text>"
+}

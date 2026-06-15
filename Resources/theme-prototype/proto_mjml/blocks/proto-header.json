@@ -1,0 +1,6 @@
+{
+  "id": "proto-header",
+  "label": "Header",
+  "category": "Mautic Structures",
+  "content": "<mj-section background-color=\"{color_primary}\" padding=\"24px 20px\"><mj-column><mj-text align=\"center\" color=\"{color_white}\" font-size=\"28px\" padding=\"0\"><h1><b>{subject}</b></h1></mj-text></mj-column></mj-section>"
+}

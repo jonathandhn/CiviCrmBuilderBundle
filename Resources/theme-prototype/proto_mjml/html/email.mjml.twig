@@ -1,0 +1,54 @@
+<mjml>
+  <mj-head>
+    <mj-preview>{subject}</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="{font_main}" color="{color_secondary}"></mj-all>
+      <mj-text font-size="16px" line-height="24px" color="{color_secondary}"></mj-text>
+      <mj-button background-color="{color_primary}" color="{color_white}" border-radius="6px"></mj-button>
+    </mj-attributes>
+    <mj-style inline="inline">
+      a, a:hover, a:focus, a:visited { color: {color_primary}; text-decoration: none; }
+      p, h1, h2, h3 { margin: 10px 0; }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="{color_accent}" width="800px">
+    <mj-section padding="12px 0 0">
+      <mj-column>
+        <mj-text align="right" color="{color_muted}" font-size="11px" padding="0 20px">
+          <a target="_blank" href="{webview_url}">{webview_text}</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="{color_primary}" padding="24px 20px">
+      <mj-column>
+        <mj-text align="center" color="{color_white}" font-size="28px" padding="0">
+          <h1><b>{subject}</b></h1>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="{color_white}" padding="0">
+      <mj-column>
+        <mj-text color="{color_primary}" font-size="20px" padding="24px 28px 0">
+          <h2>Section title</h2>
+        </mj-text>
+        <mj-text padding="8px 28px 28px">
+          <p>Your content starts here.</p>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="24px 0 40px">
+      <mj-column>
+        <mj-divider border-color="{color_primary}" border-width="2px" padding="0 0 16px" width="80%"></mj-divider>
+        <mj-text align="center" color="{color_muted}" font-size="13px" padding="0 24px">
+          <p><b>Your organization</b><br>Street address<br>City, ZIP</p>
+        </mj-text>
+        <mj-text align="center" color="{color_muted}" font-size="11px" padding="8px 24px 0">
+          <a target="_blank" href="{unsubscribe_url}">{unsubscribe_text}</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

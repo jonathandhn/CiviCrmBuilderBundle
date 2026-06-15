@@ -1,0 +1,7 @@
+{
+  "name": "Proto MJML",
+  "author": "CiviCrmBuilderBundle",
+  "authorUrl": "https://example.org",
+  "builder": ["grapesjsbuilder"],
+  "features": ["page", "email", "form"]
+}

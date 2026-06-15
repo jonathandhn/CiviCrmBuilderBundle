@@ -1,16 +1,16 @@
 <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <h4 class="modal-title" id="CiviCrmLinkModalLabel">Lier cet e-mail à un modèle CiviCRM</h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="{{ 'civicrmbuilder.modal.close'|trans }}"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="CiviCrmLinkModalLabel">{{ 'civicrmbuilder.modal.link_template.title'|trans }}</h4>
 </div>
 
 <div class="modal-body">
-    <p>Saisissez un ID numérique (ex: <code>20</code>) pour rechercher par ID, ou du texte (ex: <code>Newsletter</code>) pour rechercher par nom de modèle.</p>
+    <p>{{ 'civicrmbuilder.modal.link_template.help'|trans }}</p>
     
     <div class="form-group">
-        <label for="civicrm-template-search" class="control-label">Recherche CiviCRM</label>
+        <label for="civicrm-template-search" class="control-label">{{ 'civicrmbuilder.modal.link_template.search_label'|trans }}</label>
         <div class="input-group">
             <span class="input-group-addon"><i class="fa fa-search"></i></span>
-            <input type="text" id="civicrm-template-search" class="form-control" placeholder="Entrez un ID ou un texte..." autocomplete="off">
+            <input type="text" id="civicrm-template-search" class="form-control" placeholder="{{ 'civicrmbuilder.modal.link_template.search_placeholder'|trans }}" autocomplete="off">
         </div>
     </div>
 
@@ -18,19 +18,30 @@
 
     <form id="civicrm-link-form" action="{{ path('civicrm_builder_civicrm_link_template', {'objectId': objectId}) }}" method="POST" style="display:none;">
         <div class="form-group">
-            <label class="control-label">Sélectionnez le modèle à lier :</label>
+            <label class="control-label">{{ 'civicrmbuilder.modal.link_template.select_label'|trans }}</label>
             <div id="civicrm-search-results" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px;">
                 <!-- Résultats insérés ici en JS -->
             </div>
         </div>
         <div class="text-center mt-md">
-            <button type="submit" class="btn btn-primary btn-lg" id="civicrm-btn-submit" disabled><i class="fa fa-link"></i> Valider le lien</button>
+            <button type="submit" class="btn btn-primary btn-lg" id="civicrm-btn-submit" disabled><i class="fa fa-link"></i> {{ 'civicrmbuilder.modal.link_template.submit'|trans }}</button>
         </div>
     </form>
 </div>
 
 <script>
 (function($) {
+    const translations = {
+        searching: {{ 'civicrmbuilder.modal.link_template.searching'|trans|json_encode|raw }},
+        resultsFound: {{ 'civicrmbuilder.modal.link_template.results_found'|trans({'%count%': '__COUNT__'})|json_encode|raw }},
+        noResults: {{ 'civicrmbuilder.modal.link_template.no_results'|trans({'%query%': '__QUERY__'})|json_encode|raw }},
+        communicationError: {{ 'civicrmbuilder.modal.link_template.communication_error'|trans|json_encode|raw }},
+        saving: {{ 'civicrmbuilder.modal.link_template.saving'|trans|json_encode|raw }},
+        linkError: {{ 'civicrmbuilder.modal.link_template.link_error'|trans|json_encode|raw }},
+        serverError: {{ 'civicrmbuilder.modal.link_template.server_error'|trans|json_encode|raw }},
+        submit: {{ 'civicrmbuilder.modal.link_template.submit'|trans|json_encode|raw }}
+    };
+
     let debounceTimer;
     
     $('#civicrm-template-search').on('input', function() {
@@ -47,7 +58,7 @@
             return;
         }
 
-        $status.html('<i class="fa fa-spinner fa-spin"></i> Recherche dans CiviCRM en cours...');
+        $status.html('<i class="fa fa-spinner fa-spin"></i> ' + translations.searching);
         $form.hide();
         $results.empty();
         $btn.prop('disabled', true);
@@ -59,7 +70,7 @@
                 data: { query: query },
                 success: function(response) {
                     if (response.success && response.data && response.data.length > 0) {
-                        $status.html('<span class="text-success"><i class="fa fa-check"></i> ' + response.data.length + ' résultat(s) trouvé(s)</span>');
+                        $status.html('<span class="text-success"><i class="fa fa-check"></i> ' + translations.resultsFound.replace('__COUNT__', response.data.length) + '</span>');
                         $form.show();
                         
                         let html = '';
@@ -82,11 +93,11 @@
                         }
 
                     } else {
-                        $status.html('<span class="text-danger"><i class="fa fa-exclamation-triangle"></i> Aucun modèle trouvé pour "' + query + '"</span>');
+                        $status.html('<span class="text-danger"><i class="fa fa-exclamation-triangle"></i> ' + translations.noResults.replace('__QUERY__', query) + '</span>');
                     }
                 },
                 error: function() {
-                    $status.html('<span class="text-danger"><i class="fa fa-times"></i> Erreur lors de la communication avec CiviCRM</span>');
+                    $status.html('<span class="text-danger"><i class="fa fa-times"></i> ' + translations.communicationError + '</span>');
                 }
             });
         }, 500); // 500ms debounce
@@ -96,7 +107,7 @@
     $('#civicrm-link-form').on('submit', function(e) {
         e.preventDefault();
         const $btn = $('#civicrm-btn-submit');
-        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Enregistrement...');
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> ' + translations.saving);
 
         $.ajax({
             url: $(this).attr('action'),
@@ -112,13 +123,13 @@
                         window.location.reload();
                     }
                 } else {
-                    alert(response.error || 'Erreur lors de la liaison.');
-                    $btn.prop('disabled', false).html('<i class="fa fa-link"></i> Valider le lien');
+                    alert(response.error || translations.linkError);
+                    $btn.prop('disabled', false).html('<i class="fa fa-link"></i> ' + translations.submit);
                 }
             },
             error: function() {
-                alert('Erreur serveur.');
-                $btn.prop('disabled', false).html('<i class="fa fa-link"></i> Valider le lien');
+                alert(translations.serverError);
+                $btn.prop('disabled', false).html('<i class="fa fa-link"></i> ' + translations.submit);
             }
         });
     });

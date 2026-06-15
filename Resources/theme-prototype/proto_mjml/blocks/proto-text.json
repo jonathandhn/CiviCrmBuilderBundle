@@ -1,0 +1,6 @@
+{
+  "id": "proto-text",
+  "label": "Text",
+  "category": "Mautic Elements",
+  "content": "<mj-text align=\"left\" padding=\"10px 25px\"><p>Your content starts here.</p></mj-text>"
+}

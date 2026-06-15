@@ -1,0 +1,10 @@
+{% extends "@themes/"~template~"/html/base.html.twig" %}
+
+{% block content %}
+  <div style="max-width: 800px; margin: 0 auto; background: #ffffff; padding: 32px;">
+    {% if page is defined %}
+      <h1 style="margin-top: 0; color: #2f6fed;">{pagetitle}</h1>
+    {% endif %}
+    {{ content|default('')|raw }}
+  </div>
+{% endblock %}

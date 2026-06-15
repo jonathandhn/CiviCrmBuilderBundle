@@ -31,11 +31,11 @@ class CiviCrmPermissions extends AbstractPermissions
 
     public function buildForm(FormBuilderInterface &$builder, array $options, array $data): void
     {
-        $this->addCustomFormFields('civicrmbuilder', 'civicrm', $builder, 'CiviCRM Intégration & Éditeur', [
-            'Pousser un brouillon (Newsletter)'  => 'push_draft',
-            'Pousser un modèle (MessageTemplate)' => 'push_template',
-            'Lier à un modèle (MessageTemplate)'  => 'link_template',
-            'Sauvegarder un bloc personnalisé'    => 'save_block',
+        $this->addCustomFormFields('civicrmbuilder', 'civicrm', $builder, 'civicrmbuilder.permissions.section', [
+            'civicrmbuilder.permissions.push_draft'    => 'push_draft',
+            'civicrmbuilder.permissions.push_template' => 'push_template',
+            'civicrmbuilder.permissions.link_template' => 'link_template',
+            'civicrmbuilder.permissions.save_block'    => 'save_block',
         ], $data);
     }
 }

@@ -59,11 +59,11 @@ class EmailProtectionSubscriber implements EventSubscriberInterface
         }
 
         $settings = unserialize($settingsStr, ['allowed_classes' => false]);
-        if (!is_array($settings) || !isset($settings['integration']['email_mappings'])) {
+        if (!is_array($settings) || !isset($settings['integration']['template_mappings'])) {
             return;
         }
 
-        $mappings = $settings['integration']['email_mappings'];
+        $mappings = $settings['integration']['template_mappings'];
         
         // Si l'ID de cet email se trouve dans les mappings
         if (isset($mappings[$email->getId()])) {

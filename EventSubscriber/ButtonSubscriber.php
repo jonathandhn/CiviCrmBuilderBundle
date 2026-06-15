@@ -10,16 +10,19 @@ use Mautic\CoreBundle\Twig\Helper\ButtonHelper;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Mautic\CoreBundle\Security\Permissions\CorePermissions;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ButtonSubscriber implements EventSubscriberInterface
 {
     private RouterInterface $router;
     private CorePermissions $security;
+    private TranslatorInterface $translator;
 
-    public function __construct(RouterInterface $router, CorePermissions $security)
+    public function __construct(RouterInterface $router, CorePermissions $security, TranslatorInterface $translator)
     {
         $this->router = $router;
         $this->security = $security;
+        $this->translator = $translator;
     }
 
     public static function getSubscribedEvents(): array
@@ -49,9 +52,9 @@ class ButtonSubscriber implements EventSubscriberInterface
                     'attr'      => [
                         'href'        => $pushRoute,
                         'data-toggle' => 'tooltip',
-                        'title'       => 'Créer/MAJ un brouillon dans CiviCRM',
+                        'title'       => $this->translator->trans('civicrmbuilder.button.push_draft.title'),
                     ],
-                    'btnText'   => 'Pousser (Brouillon CiviCRM)',
+                    'btnText'   => $this->translator->trans('civicrmbuilder.button.push_draft.text'),
                     'iconClass' => 'ri-cloud-upload-line',
                 ],
                 ButtonHelper::LOCATION_PAGE_ACTIONS
@@ -64,9 +67,9 @@ class ButtonSubscriber implements EventSubscriberInterface
                     'attr'      => [
                         'href'        => $pushTemplateRoute,
                         'data-toggle' => 'tooltip',
-                        'title'       => 'Créer/MAJ un Modèle de Message dans CiviCRM',
+                        'title'       => $this->translator->trans('civicrmbuilder.button.push_template.title'),
                     ],
-                    'btnText'   => 'Pousser (Modèle CiviCRM)',
+                    'btnText'   => $this->translator->trans('civicrmbuilder.button.push_template.text'),
                     'iconClass' => 'ri-cloud-upload-line',
                 ],
                 ButtonHelper::LOCATION_PAGE_ACTIONS
@@ -82,10 +85,10 @@ class ButtonSubscriber implements EventSubscriberInterface
                         'href'        => $linkRoute,
                         'data-toggle' => 'ajaxmodal',
                         'data-target' => '#MauticSharedModal',
-                        'data-header' => 'Lier un modèle CiviCRM',
-                        'title'       => 'Lier à un Modèle de Message CiviCRM',
+                        'data-header' => $this->translator->trans('civicrmbuilder.button.link_template.header'),
+                        'title'       => $this->translator->trans('civicrmbuilder.button.link_template.title'),
                     ],
-                    'btnText'   => 'Lier (Modèle CiviCRM)',
+                    'btnText'   => $this->translator->trans('civicrmbuilder.button.link_template.text'),
                     'iconClass' => 'ri-links-line',
                 ],
                 ButtonHelper::LOCATION_PAGE_ACTIONS

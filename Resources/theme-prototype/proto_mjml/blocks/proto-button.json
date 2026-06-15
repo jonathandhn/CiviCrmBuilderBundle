@@ -1,0 +1,6 @@
+{
+  "id": "proto-button",
+  "label": "Button",
+  "category": "Mautic Elements",
+  "content": "<mj-button align=\"left\" background-color=\"{color_primary}\" color=\"{color_white}\" border-radius=\"6px\" href=\"#\" inner-padding=\"12px 24px\"><b>Call to action</b></mj-button>"
+}

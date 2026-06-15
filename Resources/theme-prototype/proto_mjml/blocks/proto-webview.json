@@ -1,0 +1,6 @@
+{
+  "id": "proto-webview",
+  "label": "Webview link",
+  "category": "Mautic Elements",
+  "content": "<mj-text align=\"right\" color=\"{color_muted}\" font-size=\"11px\" padding=\"0 20px\"><p><a target=\"_blank\" href=\"{webview_url}\">{webview_text}</a></p></mj-text>"
+}

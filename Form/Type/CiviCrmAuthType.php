@@ -19,39 +19,39 @@ class CiviCrmAuthType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('civicrm_url', UrlType::class, [
-            'label' => 'URL CiviCRM',
+            'label' => 'civicrmbuilder.config.civicrm_url.label',
             'required' => true,
             'attr' => [
                 'class' => 'form-control',
-                'placeholder' => 'ex: https://crm.exemple.org',
+                'placeholder' => 'civicrmbuilder.config.civicrm_url.placeholder',
             ],
             'constraints' => [
-                new NotBlank(['message' => 'L\'URL CiviCRM est requise']),
+                new NotBlank(['message' => 'civicrmbuilder.config.civicrm_url.required']),
             ],
         ]);
 
         $builder->add('api_key', TextType::class, [
-            'label' => 'Clé API (Bearer Token)',
+            'label' => 'civicrmbuilder.config.api_key.label',
             'required' => true,
             'attr' => [
                 'class' => 'form-control',
-                'placeholder' => 'ex: 8geCAfNp...',
+                'placeholder' => 'civicrmbuilder.config.api_key.placeholder',
             ],
             'constraints' => [
-                new NotBlank(['message' => 'La clé API est requise']),
+                new NotBlank(['message' => 'civicrmbuilder.config.api_key.required']),
             ],
         ]);
 
         $builder->add('clear_mappings', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
-            'label' => 'Vider l\'historique des liaisons de brouillons',
+            'label' => 'civicrmbuilder.config.clear_mappings.label',
             'required' => false,
-            'help' => 'Cochez cette case pour forcer la recréation de tous les brouillons lors du prochain envoi.',
+            'help' => 'civicrmbuilder.config.clear_mappings.help',
         ]);
 
         $builder->add('clear_template_mappings', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
-            'label' => 'Vider l\'historique des liaisons de Modèles de Message',
+            'label' => 'civicrmbuilder.config.clear_template_mappings.label',
             'required' => false,
-            'help' => 'Cochez cette case pour forcer la recréation de tous les MessageTemplates lors du prochain envoi.',
+            'help' => 'civicrmbuilder.config.clear_template_mappings.help',
         ]);
 
         $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
@@ -106,7 +106,8 @@ class CiviCrmAuthType extends AbstractType
         curl_close($ch);
 
         if ($httpCode < 200 || $httpCode >= 300) {
-            $context->buildViolation('La connexion à CiviCRM a échoué. Vérifiez l\'URL et la clé API. (Code HTTP: ' . $httpCode . ')')
+            $context->buildViolation('civicrmbuilder.config.credentials.invalid')
+                ->setParameter('%http_code%', (string) $httpCode)
                 ->atPath('api_key')
                 ->addViolation();
         }

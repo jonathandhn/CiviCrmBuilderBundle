@@ -62,6 +62,7 @@ return [
                 'arguments' => [
                     'router',
                     'mautic.security',
+                    'translator',
                 ],
             ],
             'mautic.civicrmbuilder.subscriber.email_protection' => [

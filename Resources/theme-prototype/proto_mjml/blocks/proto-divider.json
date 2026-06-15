@@ -1,0 +1,6 @@
+{
+  "id": "proto-divider",
+  "label": "Divider",
+  "category": "Mautic Elements",
+  "content": "<mj-divider border-color=\"{color_primary}\" border-width=\"2px\" padding=\"10px 25px\" width=\"100%\"></mj-divider>"
+}

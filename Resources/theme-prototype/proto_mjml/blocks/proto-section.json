@@ -1,0 +1,6 @@
+{
+  "id": "proto-section",
+  "label": "Section",
+  "category": "Mautic Structures",
+  "content": "<mj-section background-color=\"{color_white}\" padding=\"0\"><mj-column><mj-text color=\"{color_primary}\" font-size=\"20px\" padding=\"24px 28px 0\"><h2>Section title</h2></mj-text><mj-text padding=\"8px 28px 28px\"><p>Your content starts here.</p></mj-text></mj-column></mj-section>"
+}

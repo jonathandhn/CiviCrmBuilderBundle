@@ -82,7 +82,7 @@ return [
             'civicrmbuilder.integration.config' => [
                 'class' => \MauticPlugin\CiviCrmBuilderBundle\Integration\Config::class,
                 'arguments' => [
-                    'mautic.helper.integration',
+                    'mautic.integrations.helper',
                 ],
             ],
         ],

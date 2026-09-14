@@ -33,16 +33,17 @@ export function registerBlocks(editor: any, customBlocks: CustomBlock[]) {
     customBlocks.forEach(block => {
         // Résolution de la catégorie si le JSON référence un ID de catégorie connu (ex: "civicrm-elements")
         // ou utilisation directe du string fourni.
-        let targetCategory = block.category;
+        const blockCategory = block.category ?? 'Thème Mautic';
+        let targetCategory = blockCategory;
         for (const [key, catObj] of Object.entries(categories)) {
-            if (catObj.id === block.category || catObj.get('label') === block.category) {
+            if (catObj.id === blockCategory || catObj.get('label') === blockCategory) {
                 targetCategory = catObj.id;
                 break;
             }
         }
         
         if(block.id.toLowerCase().includes("civicrm")){ 
-            targetCategory = block.category.includes("Structures") ? categories.catCiviStructures.id : categories.catCiviElements.id; 
+            targetCategory = blockCategory.includes("Structures") ? categories.catCiviStructures.id : categories.catCiviElements.id;
         }
 
         // Déterminer l'icône automatiquement

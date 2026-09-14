@@ -1,5 +1,6 @@
-export default ({ config }) => {
-    const path = require('path');
+const path = require('node:path');
+
+module.exports = ({ config }) => {
     const isBuild = config.mode === 'production';
 
     return {
